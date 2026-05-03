@@ -1,25 +1,26 @@
 import React, { useContext, useState } from 'react'
 import bg1 from "../assets/Background3.jpg";
-import { authContext } from '../Contexts/UserAuthContext';
+
+
 import * as yup from "yup"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { agentAuthContext } from '../Contexts/AgentAuthContext';
 
 
-const loginSchema = yup.object({
-  userEmail: yup.string().email("Invalid Email").required("Email Field is Required"),
-  password: yup.string().min(6, "Password should be at least 6 characters").required("Password Field Required"),
+const agentSchema = yup.object({
+  userEmail: yup.string().email("Inavlid Email").required("Email Filed Required"),
+  password: yup.string().min(6, "Minimum of Six Charcters").matches(/[a-z]/, "Password must contain lowercase Letter"),
 })
 
-const SignInPage = () => {
 
-  const { handleSignIn, loadingLogin } = useContext(authContext)
+const AgentSignin = () => {
+  const { handleSignIn, loadingLogin } = useContext(agentAuthContext)
 
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
-
-
-  const submitDetails = async (data) => {
+  const submitData = async (data) => {
     try {
       await handleSignIn(data)
     } catch (error) {
@@ -29,19 +30,14 @@ const SignInPage = () => {
   }
 
   const { register, handleSubmit, formState: { errors } } = useForm({
-    resolver: yupResolver(loginSchema)
+    resolver: yupResolver(agentSchema)
   })
 
 
-  const handleError = (err) => {
-    const formErr = Object.values(err)[0].message
-    toast.error(formErr)
-
+  const handleErr = (formErr) => {
+    const firstErr = Object.values(formErr)[0].message
+    toast.error(firstErr)
   }
-
-
-  const [passwordVisible, setPasswordVisible] = useState(false);
-
 
   const togglePassword = () => {
     setPasswordVisible(!passwordVisible);
@@ -65,15 +61,24 @@ const SignInPage = () => {
       <div className="relative z-10 w-full max-w-2xl p-4">
 
 
-        <form className='bg-white/20 backdrop-blur-2xl border border-white/40 p-10 rounded-3xl shadow-2xl shadow-slate-200 space-y-5' onSubmit={handleSubmit(handleSignIn, handleError)}  >
+        <form className='bg-white/20 backdrop-blur-2xl border border-white/40 p-10 rounded-3xl shadow-2xl shadow-slate-200 space-y-5' onSubmit={handleSubmit(submitData, handleErr)} >
 
-          <div className="text-center mb-9">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight">
-              Prop<span className="text-slate-700">vista</span>
-            </h1>
-            <p className="text-slate-700 text-base mt-3 max-w-sm mx-auto">
-              Welcome back! Please enter your details.
-            </p>
+          <div className="flex flex-col items-center justify-center mb-10 space-y-3">
+
+            <div className="flex items-center gap-2">
+              <h1 className="text-5xl font-extrabold tracking-tight text-slate-900">
+                Prop<span className="text-slate-500">Vista</span>
+              </h1>
+              <span className="bg-gradient-to-l from-slate-800 to-slate-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                Agent
+              </span>
+            </div>
+            <div className="text-center">
+              <p className="text-sm text-slate-500">
+                Access your dashboard to manage properties and clients.
+              </p>
+            </div>
+
           </div>
 
           <div className='space-y-4'>
@@ -91,7 +96,7 @@ const SignInPage = () => {
               <i className="fa fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-slate-600 transition-colors"></i>
               <input
                 type={passwordVisible ? "text" : "password"}
-                placeholder="******"
+                placeholder="*******"
                 className="w-full pl-12 pr-12 py-4 bg-white border border-slate-200 rounded-xl outline-none  focus:ring-1 focus:ring-slate-400 transition-all text-slate-900 font-medium placeholder:text-slate-400"
                 {...register("password")}
               />
@@ -107,12 +112,12 @@ const SignInPage = () => {
           <button
             type="submit"
             className={`w-full py-4 rounded-xl mt-4 flex items-center justify-center gap-2 text-white font-semibold transition-all 
-                ${loadingLogin ? "bg-gray-400 cursor-not-allowed" : "bg-slate-900 hover:bg-slate-700 cursor-pointer"}`}
+                            ${loadingLogin ? "bg-gray-500 cursor-not-allowed" : "bg-slate-900 hover:bg-slate-700 cursor-pointer "}`}
             disabled={loadingLogin}
           >
             {loadingLogin ? (
               <>
-                <span>Authenticating</span>
+                <span>Authenticating User</span>
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               </>
             ) : (
@@ -124,7 +129,7 @@ const SignInPage = () => {
           <div className="pt-6 border-t border-slate-200/60 text-center">
             <p className="text-slate-600 text-sm">
               Don't have an account?
-              <a href="/signup" className="text-blue-700 hover:text-blue-800 ml-1.5 font-semibold transition-colors">
+              <a href="/agent/signup" className="text-blue-700 hover:text-blue-800 ml-1.5 font-semibold transition-colors">
                 Create an account
               </a>
             </p>
@@ -137,4 +142,4 @@ const SignInPage = () => {
   )
 }
 
-export default SignInPage
+export default AgentSignin
