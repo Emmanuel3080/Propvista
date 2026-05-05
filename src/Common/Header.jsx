@@ -20,13 +20,13 @@ const Header = () => {
     };
 
     return (
-        <header className="bg-white/90 backdrop-blur-md text-slate-900 shadow-sm sticky top-0 z-50 border-b border-slate-100">
+        <header className="bg-slate-200 backdrop-blur-md text-slate-900 shadow-sm sticky top-0 z-50 border-b border-slate-200">
             <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
 
                 {/* Logo & Desktop Nav */}
                 <div className="flex items-center gap-8">
                     <Link to="/" className="text-2xl font-extrabold tracking-tight hover:opacity-90 transition-opacity">
-                        Prop<span className="text-blue-600">Vista</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-black">Propvista</span>
                     </Link>
 
                     <nav className="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600">
