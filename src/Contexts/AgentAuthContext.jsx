@@ -111,7 +111,7 @@ const AgentAuthProvider = ({ children }) => {
             })
             const data = await response.json()
             if (response.ok) {
-                setuserInfo(data.user.fullName)
+                setuserInfo(data.user)
                 return true
             }
             else {

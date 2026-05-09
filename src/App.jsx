@@ -16,6 +16,7 @@ import AgentAuthProvider from './Contexts/AgentAuthContext'
 import AgentDashboard from './Dashboard/AgentDashboard'
 import AgentProtected from './ProtectedPage/AgentProtected'
 import PropertyProvider from './Contexts/PropertyContext'
+import PostProperty from './Pages/PostProperty'
 
 
 function App() {
@@ -67,7 +68,9 @@ function App() {
                 {/* Agent Protected Routes */}
                 <Route element={<AgentProtected />}>
                   <Route path='/dashboard' element={<AgentDashboard />} />
-                </Route>
+                  <Route path="/post-job" element={<PostProperty/>}
+                  />
+                  </Route>
 
 
               </Routes>

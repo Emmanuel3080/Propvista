@@ -4,7 +4,8 @@ const PropertyCard = ({ title, location, price, bedrooms, description, image, pr
     if (!title) return null;
 
     return (
-        <div className="group relative w-full max-w-[360px] bg-white rounded-[2.5rem] p-4 transition-all duration-500 hover:shadow-[0_40px_80px_-20px_rgba(79,70,229,0.2)]">
+        
+        <div className="group relative w-full max-w-[360px] bg-white rounded-[2.5rem] p-4 transition-all duration-500 hover:shadow-[0_40px_80px_-20px_rgba(79,70,229,0.2)] cursor-pointer">
             
             {/* Image Container with Floating Badge */}
             <div className="relative h-64 w-full overflow-hidden rounded-[2rem] bg-gray-100">
