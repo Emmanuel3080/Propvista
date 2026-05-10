@@ -1,12 +1,12 @@
 import React from 'react';
 
-const PropertyCard = ({ title, location, price, bedrooms, description, image, propertyType }) => {
+const PropertyCard = ({ title, location, price, bedrooms, description, image, propertyType, id }) => {
     if (!title) return null;
 
     return (
-        
+
         <div className="group relative w-full max-w-[360px] bg-white rounded-[2.5rem] p-4 transition-all duration-500 hover:shadow-[0_40px_80px_-20px_rgba(79,70,229,0.2)] cursor-pointer">
-            
+
             {/* Image Container with Floating Badge */}
             <div className="relative h-64 w-full overflow-hidden rounded-[2rem] bg-gray-100">
                 <img
@@ -14,7 +14,7 @@ const PropertyCard = ({ title, location, price, bedrooms, description, image, pr
                     src={image}
                     alt={title}
                 />
-                
+
                 {/* Modern Status Badge */}
                 <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full shadow-xl">
                     {/* <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> */}
@@ -31,14 +31,14 @@ const PropertyCard = ({ title, location, price, bedrooms, description, image, pr
 
             {/* Content Area */}
             <div className="px-2 pt-8 pb-2">
-                
+
                 {/* Meta Row: Location & Stats */}
                 <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-1.5 text-indigo-500/80">
                         <i className="fa-solid fa-location-dot text-[10px]"></i>
                         <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{location}</span>
                     </div>
-                    
+
                     <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1">
                             <i className="fa-solid fa-bed text-gray-400 text-[11px]"></i>
@@ -65,7 +65,6 @@ const PropertyCard = ({ title, location, price, bedrooms, description, image, pr
                     </p>
                 </div>
 
-                {/* Interactive Footer */}
                 <div className="mt-6 flex items-center justify-between">
                     {/* <div className="flex -space-x-2">
                          Visual "Social Proof" elements are very modern right now
@@ -80,10 +79,18 @@ const PropertyCard = ({ title, location, price, bedrooms, description, image, pr
                     </div> */}
 
                     <button className="flex items-center gap-2 group/btn">
-                        <span className="text-[11px] font-black uppercase tracking-widest text-gray-900 group-hover/btn:text-indigo-600 transition-colors">View Property</span>
-                        <div className="h-8 w-8 rounded-full bg-gray-900 flex items-center justify-center text-white transition-all group-hover/btn:bg-indigo-600 group-hover/btn:translate-x-1">
+                        <a href={`/single/${id}`} className="text-[11px] font-black uppercase tracking-widest text-gray-900 group-hover/btn:text-indigo-600 transition-colors">
+                        <div className='flex items-center gap-1 '>
+                          <h1>View Details</h1>
+
+                             <div className="h-6 w-6 rounded-full bg-gray-900 flex items-center justify-center text-white transition-all group-hover/btn:bg-indigo-600 group-hover/btn:translate-x-1">
                             <i className="fa-solid fa-arrow-right-long text-[10px]"></i>
                         </div>
+
+                        </div>
+                        
+                        </a>
+                   
                     </button>
                 </div>
             </div>

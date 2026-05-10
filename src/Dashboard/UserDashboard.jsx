@@ -64,16 +64,21 @@ const UserDashboard = () => {
                 key={prop._id || index}
                 className="transform transition duration-300 hover:-translate-y-1"
               >
-                <PropertyCard
-                  title={prop?.title}
-                  location={prop?.location}
-                  price={prop?.price}
-                  bedrooms={prop?.bedrooms}
-                  description={prop?.description}
-                  image={prop?.image}
-                  agent={prop?.agent}
-                  propertyType={prop?.propertyType}
-                />
+                <a href={`/single/${prop._id}`}>
+                  <PropertyCard
+                    title={prop?.title}
+                    location={prop?.location}
+                    price={prop?.price}
+                    bedrooms={prop?.bedrooms}
+                    description={prop?.description}
+                    image={prop?.image}
+                    agent={prop?.agent}
+                    propertyType={prop?.propertyType}
+                    id={prop?._id}
+                  />
+
+                </a>
+
               </div>
             ))}
           </div>

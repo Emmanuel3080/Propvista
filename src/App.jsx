@@ -17,6 +17,7 @@ import AgentDashboard from './Dashboard/AgentDashboard'
 import AgentProtected from './ProtectedPage/AgentProtected'
 import PropertyProvider from './Contexts/PropertyContext'
 import PostProperty from './Pages/PostProperty'
+import SinglePropertyPage from './Pages/SinglePropertyPage'
 
 
 function App() {
@@ -57,6 +58,7 @@ function App() {
                 {/* User Protected Route */}
                 <Route element={<ProtectedRoute />}>
                   <Route path='/' element={<UserDashboard />} />
+                  <Route path='/single/:id' element={<SinglePropertyPage />} />
                 </Route>
 
 
@@ -68,9 +70,9 @@ function App() {
                 {/* Agent Protected Routes */}
                 <Route element={<AgentProtected />}>
                   <Route path='/dashboard' element={<AgentDashboard />} />
-                  <Route path="/post-job" element={<PostProperty/>}
+                  <Route path="/post-job" element={<PostProperty />}
                   />
-                  </Route>
+                </Route>
 
 
               </Routes>

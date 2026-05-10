@@ -15,7 +15,7 @@ const AgentDashboard = () => {
 
             <PropVistaHeader />
 
-            <AgentProperties />
+          <AgentProperties />
 
 
 

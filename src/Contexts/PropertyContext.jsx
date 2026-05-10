@@ -15,6 +15,7 @@ const PropertyProvider = ({ children }) => {
     const [showAgentProperty, setAgentProperty] = useState(false)
     const [agentProp, viewAgentProp] = useState([])
     const [addingProperty, setAddProperty] = useState(false)
+    const [singleProp, setSingleProp] = useState({})
 
 
     const navigate = useNavigate()
@@ -116,15 +117,42 @@ const PropertyProvider = ({ children }) => {
         }
     }
 
+
+
+    const singleProperty = async (id) => {
+        try {
+            const response = await fetch(`${baseUrl}/users/property/single/${id}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    authorization: `Bearer ${localStorage.getItem("AccessToken")}`
+                }
+            })
+
+            const data = await response.json()
+            if (response.ok) {
+                console.log(data);
+                setSingleProp(data.property)
+            } else {
+                toast.error("Unable to fetch Property")
+            }
+
+        } catch (error) {
+            console.log(error);
+
+        }
+    }
+
     const propertyValue = {
         fetchProperties,
         agentProperty,
         postProperty,
+        singleProperty,
         addingProperty,
         property,
         loadProperty,
         agentProp,
-        showAgentProperty
+        showAgentProperty,
+        singleProp
     }
     return (
         <>
