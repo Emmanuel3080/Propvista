@@ -1,13 +1,13 @@
 import React from 'react';
-import { 
-  MapPin, 
-  BedDouble, 
-  Clock, 
-  Calendar, 
-  Phone, 
-  Mail, 
-  Building2, 
-  ChevronLeft 
+import {
+  MapPin,
+  BedDouble,
+  Clock,
+  Calendar,
+  Phone,
+  Mail,
+  Building2,
+  ChevronLeft
 } from 'lucide-react';
 
 const PropertyDetail = ({ property, onBack }) => {
@@ -16,14 +16,14 @@ const PropertyDetail = ({ property, onBack }) => {
   return (
     <div className="max-w-6xl mx-auto bg-white min-h-screen shadow-xl">
       <div className="relative h-[300 md:h-[450px] w-full overflow-hidden">
-        <img 
-          src={property.image} 
-          alt={property.title} 
+        <img
+          src={property.image}
+          alt={property.title}
           className="w-full h-full object-cover"
         />
-        
+
         <div className="absolute top-4 left-4">
-          <button 
+          <button
             onClick={onBack}
             className="p-2 bg-white/90 backdrop-blur rounded-full shadow-lg hover:bg-white transition-colors"
           >
@@ -52,7 +52,7 @@ const PropertyDetail = ({ property, onBack }) => {
       </div>
 
       <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-        
+
         <div className="md:col-span-2 space-y-8">
           <div className="flex gap-6 border-b border-slate-100 pb-6">
             <div className="flex items-center gap-2">
@@ -96,12 +96,15 @@ const PropertyDetail = ({ property, onBack }) => {
                     <span className="font-bold">Slot {index + 1}</span>
                   </div>
                   <p className="text-slate-700 font-medium">
-                    {new Date(slot.date).toLocaleDateString('en-GB', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
+                    {new Date(slot.date).toLocaleDateString('en-GB', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
                     })}
+                  </p>
+                  <p className="text-slate-700 font-medium">
+                   {slot.times}
                   </p>
                   <p className="text-xs text-slate-400 mt-1">ID: {slot._id}</p>
                 </div>
@@ -114,11 +117,11 @@ const PropertyDetail = ({ property, onBack }) => {
         <div className="space-y-6">
           <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 sticky top-6">
             <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-6">Listed By</h3>
-            
+
             <div className="flex flex-col items-center text-center">
-              <img 
-                src={property?.agent?.profileImage} 
-                alt={property?.agent?.fullName} 
+              <img
+                src={property?.agent?.profileImage}
+                alt={property?.agent?.fullName}
                 className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md mb-4"
               />
               <h4 className="text-xl font-bold text-slate-800">{property?.agent?.fullName}</h4>
@@ -129,15 +132,15 @@ const PropertyDetail = ({ property, onBack }) => {
             </div>
 
             <div className="space-y-3 mt-4">
-              <a 
-                href={`tel:${property?.agent?.phone}`} 
+              <a
+                href={`tel:${property?.agent?.phone}`}
                 className="flex items-center gap-3 w-full p-3 bg-white rounded-xl border border-slate-200 text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 transition-all"
               >
                 <Phone size={18} className="text-indigo-600" />
                 <span className="text-sm font-bold">{property?.agent?.phone}</span>
               </a>
-              <a 
-                href={`mailto:${property?.agent?.email}`} 
+              <a
+                href={`mailto:${property?.agent?.email}`}
                 className="flex items-center gap-3 w-full p-3 bg-white rounded-xl border border-slate-200 text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 transition-all"
               >
                 <Mail size={18} className="text-indigo-600" />

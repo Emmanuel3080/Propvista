@@ -10,7 +10,7 @@ const Header = () => {
     const navLinks = [
         { name: 'Home', path: '/' },
         { name: 'Appointments', path: '/applications' },
-        { name: 'View Properties', path: '/jobs' },
+        { name: 'View Properties', path: '/properties' },
     ];
 
     const handleLogout = () => {

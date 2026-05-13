@@ -28,7 +28,7 @@ const UserDashboard = () => {
       <div className="px-4 py-1">
         {loadProperty ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-            {[...Array(4)].map((_, index) => (
+            {[...Array(5)].map((_, index) => (
               <div
                 key={index}
                 className="bg-white rounded-3xl shadow-md overflow-hidden animate-pulse"
@@ -59,7 +59,7 @@ const UserDashboard = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-            {property.map((prop, index) => (
+            {property.slice(0,5).map((prop, index) => (
               <div
                 key={prop._id || index}
                 className="transform transition duration-300 hover:-translate-y-1"

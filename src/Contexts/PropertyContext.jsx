@@ -16,6 +16,7 @@ const PropertyProvider = ({ children }) => {
     const [agentProp, viewAgentProp] = useState([])
     const [addingProperty, setAddProperty] = useState(false)
     const [singleProp, setSingleProp] = useState({})
+    const [deleteProp, setDelete] = useState(false)
 
 
     const navigate = useNavigate()
@@ -142,11 +143,45 @@ const PropertyProvider = ({ children }) => {
         }
     }
 
+
+
+
+    const deleteProperty = async (id) => {
+        setDelete(true)
+        try {
+
+            const response = await fetch(`${baseUrl}/agent/property/delete/${id}`, {
+                method: "DELETE",
+                headers: {
+                    authorization: `Bearer ${localStorage.getItem("AgentAccessToken")}`
+                },
+            })
+            const data = await response.json()
+            if (response.ok) {
+                toast.success(data.Message)
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            }
+            else {
+                toast.error(data.Message)
+            }
+        } catch (error) {
+            console.log(error);
+
+        }
+        finally {
+            setDelete(false)
+        }
+    }
+
     const propertyValue = {
         fetchProperties,
         agentProperty,
         postProperty,
         singleProperty,
+        deleteProperty,
+        deleteProp,
         addingProperty,
         property,
         loadProperty,

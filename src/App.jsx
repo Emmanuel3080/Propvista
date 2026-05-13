@@ -18,6 +18,8 @@ import AgentProtected from './ProtectedPage/AgentProtected'
 import PropertyProvider from './Contexts/PropertyContext'
 import PostProperty from './Pages/PostProperty'
 import SinglePropertyPage from './Pages/SinglePropertyPage'
+import AllPropperties from './Pages/AllPropperties'
+import AppointmentProvider from './Contexts/AppointmentContext'
 
 
 function App() {
@@ -30,52 +32,56 @@ function App() {
         <AgentAuthProvider>
           <AuthProvider>
             <PropertyProvider>
-              <Toaster
-                richColors
-                closeButton
-                toastOptions={{
-                  style: {
-                    background: "rgba(255, 255, 255, 0.8)", // Slight transparency
-                    backdropFilter: "blur(12px)",           // Glass effect
-                    WebkitBackdropFilter: "blur(12px)",     // Safari support
-                    border: "1px solid rgba(255, 255, 255, 0.3)",
-                    borderRadius: "14px",                   // Matches modern UI curves
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    padding: "16px",
-                    color: "#0f172a",                       // Slate-900 for readability
-                    fontFamily: "inherit",                  // Respects your app's font-family
-                    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)",
-                  },
-                  className: "my-toast-class", // Optional for Tailwind overrides
-                }}
-              />
-              <Routes>
-                <Route path='/signup' element={<SignupPage />} />
-                <Route path='/signin' element={<SignInPage />} />
+              <AppointmentProvider>
+                <Toaster
+                  richColors
+                  closeButton
+                  toastOptions={{
+                    style: {
+                      background: "rgba(255, 255, 255, 0.8)", // Slight transparency
+                      backdropFilter: "blur(12px)",           // Glass effect
+                      WebkitBackdropFilter: "blur(12px)",     // Safari support
+                      border: "1px solid rgba(255, 255, 255, 0.3)",
+                      borderRadius: "14px",                   // Matches modern UI curves
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      padding: "16px",
+                      color: "#0f172a",                       // Slate-900 for readability
+                      fontFamily: "inherit",                  // Respects your app's font-family
+                      boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)",
+                    },
+                    className: "my-toast-class", // Optional for Tailwind overrides
+                  }}
+                />
+                <Routes>
+                  <Route path='/signup' element={<SignupPage />} />
+                  <Route path='/signin' element={<SignInPage />} />
 
 
-                {/* User Protected Route */}
-                <Route element={<ProtectedRoute />}>
-                  <Route path='/' element={<UserDashboard />} />
-                  <Route path='/single/:id' element={<SinglePropertyPage />} />
-                </Route>
+                  {/* User Protected Route */}
+                  <Route element={<ProtectedRoute />}>
+                    <Route path='/' element={<UserDashboard />} />
+                    <Route path='/single/:id' element={<SinglePropertyPage />} />
+                    <Route path='/properties' element={<AllPropperties />} />
+                  </Route>
 
 
-                {/* Agent Routes */}
-                <Route path='/agent/signup' element={<AgentSignUp />} />
-                <Route path='/agent/signin' element={<AgentSignin />} />
+                  {/* Agent Routes */}
+                  <Route path='/agent/signup' element={<AgentSignUp />} />
+                  <Route path='/agent/signin' element={<AgentSignin />} />
 
 
-                {/* Agent Protected Routes */}
-                <Route element={<AgentProtected />}>
-                  <Route path='/dashboard' element={<AgentDashboard />} />
-                  <Route path="/post-job" element={<PostProperty />}
-                  />
-                </Route>
+                  {/* Agent Protected Routes */}
+                  <Route element={<AgentProtected />}>
+                    <Route path='/dashboard' element={<AgentDashboard />} />
+                    <Route path="/post-job" element={<PostProperty />}
+                    />
+                  </Route>
 
 
-              </Routes>
+                </Routes>
+
+              </AppointmentProvider>
 
             </PropertyProvider>
 

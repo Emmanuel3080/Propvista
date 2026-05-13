@@ -1,15 +1,47 @@
 import { useContext, useEffect, useState } from "react";
-import { Home, Calendar, BarChart3, Plus, User, MapPin, Trash2, Edit3, Bell } from "lucide-react";
+import { Home, Calendar, BarChart3, Plus, User, MapPin, Trash2, Edit3, Bell, Clock } from "lucide-react";
 import { agentAuthContext } from "../Contexts/AgentAuthContext";
 import { propertyContext } from "../Contexts/PropertyContext";
+import { appointmentContext } from "../Contexts/AppointmentContext";
+
+import Modal from "react-modal";
+import ReactDom from "react-dom";
+import { useNavigate } from "react-router-dom";
+
+Modal.setAppElement("#root")
 
 export default function AgentProperties() {
+    const [modalOpen, setOpen] = useState(false);
+    const [selectedPropertyId, setSelectedPropertyId] = useState(null);
 
     const { userInfo } = useContext(agentAuthContext)
 
-    const { agentProperty, agentProp,
-        showAgentProperty } = useContext(propertyContext)
+    const { AgentAppointments,
+        appointmentdata,
+        loadAppointment } = useContext(appointmentContext)
+
+    const { agentProperty, agentProp, showAgentProperty, deleteProperty, deleteProp, } = useContext(propertyContext)
     const [activeTab, setActiveTab] = useState("properties");
+
+
+
+
+
+    let subtitle;
+    const navigate = useNavigate();
+
+    function openModal() {
+        setOpen(true);
+        // setLoading(true)
+    }
+    function afterOpenModal() {
+        // references are now sync'd and can be accessed.
+        subtitle.style.color = "#f00";
+    }
+
+    function closeModal() {
+        setOpen(false);
+    }
 
 
 
@@ -21,13 +53,22 @@ export default function AgentProperties() {
     console.log(agentProp);
 
 
+
+    useEffect(() => {
+        if (userInfo?._id) {
+            AgentAppointments();
+        }
+    }, [userInfo]);
+    console.log(appointmentdata);
+    // Added dependencies
+
     //     { id: 2, title: "Modern Duplex", location: "Ikeja, Lagos", price: "₦750,000", image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400" },
     // ];
 
-    const appointments = [
-        { id: 1, name: "John Doe", property: "Luxury Apartment", date: "May 12, 2026", status: "Confirmed" },
-        { id: 2, name: "Jane Smith", property: "Modern Duplex", date: "May 14, 2026", status: "Pending" },
-    ];
+    // const appointments = [
+    //     { id: 1, name: "John Doe", property: "Luxury Apartment", date: "May 12, 2026", status: "Confirmed" },
+    //     { id: 2, name: "Jane Smith", property: "Modern Duplex", date: "May 14, 2026", status: "Pending" },
+    // ];
 
     const navItems = [
         { id: "properties", label: "My Properties", icon: Home },
@@ -39,6 +80,71 @@ export default function AgentProperties() {
     return (
         <div className="min-h-screen bg-slate-50 flex font-sans text-slate-900">
             <aside className="w-52 bg-white border-r border-slate-200 hidden md:flex flex-col sticky top-0 h-screen">
+                <Modal
+                    isOpen={modalOpen}
+                    onAfterOpen={afterOpenModal}
+                    onRequestClose={closeModal}
+                    style={{
+                        overlay: {
+                            backgroundColor: "rgba(15, 23, 42, 0.75)", // Darker, more modern slate overlay
+                            zIndex: 1000,
+                            backdropFilter: "blur(8px)", // Increased blur for better focus
+                        },
+                        content: {
+                            top: "50%",
+                            left: "50%",
+                            right: "auto",
+                            bottom: "auto",
+                            marginRight: "-50%",
+                            transform: "translate(-50%, -50%)",
+                            borderRadius: "24px", // Smoother corners
+                            padding: "0", // Handled by inner container
+                            width: "90%",
+                            maxWidth: "500px", // Slimmer for a confirmation dialog
+                            border: "none",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                            overflow: "hidden",
+                        },
+                    }}
+                    contentLabel="Delete Confirmation Modal"
+                >
+                    <div className="p-8 text-center">
+                        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-50 mb-6">
+                            <svg className="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+
+                        <h2 className="text-2xl font-black text-slate-800 mb-2">Delete Property?</h2>
+                        <p className="text-slate-500 text-sm mb-8 leading-relaxed">
+                            Are you sure you want to delete this property? This action cannot be undone and the listing will be permanently removed.
+                        </p>
+
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <button
+                                onClick={closeModal}
+                                className="flex-1 px-6 py-3.5 rounded-xl bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                disabled={deleteProp}
+                                onClick={() => deleteProperty(selectedPropertyId)}
+                                className="flex-1 flex items-center justify-center gap-3 px-6 py-5 rounded-xl bg-red-600 text-white font-bold text-sm hover:bg-red-700 shadow-lg shadow-red-200 transition-all active:scale-95 disabled:bg-red-400 disabled:cursor-not-allowed"
+                            >
+                                {deleteProp ? (
+                                    <>
+                                        <span>Deleting Property</span>
+                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                    </>
+                                ) : (
+                                    "Delete Property"
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </Modal>
                 <div className="p-4">
                     <div className="flex items-center gap-3 mb-10">
                         <div className="bg-slate-400 p-2 rounded-lg">
@@ -69,7 +175,7 @@ export default function AgentProperties() {
             <main className="flex-1 p-8 md:p-5 overflow-y-auto">
                 <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
                     <div className="flex items-center gap-4">
-    
+
                         <div>
                             <h2 className="text-3xl font-black text-slate-800 tracking-tight capitalize">
                                 My {activeTab}
@@ -111,7 +217,7 @@ export default function AgentProperties() {
                                     // onClick={() => }
                                     className="mt-4 text-indigo-600 font-bold text-sm hover:underline"
                                 >
-                                   <a href="/post-job"> List your first property</a>
+                                    <a href="/post-job"> List your first property</a>
                                 </button>
                             </div>
                         ) : (
@@ -182,7 +288,10 @@ export default function AgentProperties() {
                                                     <span className="text-[10px] uppercase tracking-tight">Edit</span>
                                                 </button>
 
-                                                <button className="px-3 py-2.5 bg-rose-50 hover:bg-rose-500 text-rose-500 hover:text-white rounded-xl transition-all duration-200">
+                                                <button className="px-3 py-2.5 bg-rose-50 hover:bg-rose-500 text-rose-500 hover:text-white rounded-xl transition-all duration-200" onClick={() => {
+                                                    setSelectedPropertyId(p._id)
+                                                    openModal()
+                                                }}>
                                                     <Trash2 size={16} />
                                                 </button>
                                             </div>
@@ -196,36 +305,100 @@ export default function AgentProperties() {
 
                 {/* Appointments Tab */}
                 {activeTab === "appointments" && (
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                        <table className="w-full text-left border-collapse">
-                            <thead className="bg-slate-50 text-slate-400 text-xs uppercase tracking-wider font-bold">
-                                <tr>
-                                    <th className="px-6 py-4">Client</th>
-                                    <th className="px-6 py-4">Property</th>
-                                    <th className="px-6 py-4">Date</th>
-                                    <th className="px-6 py-4">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                                {appointments.map((a) => (
-                                    <tr key={a.id} className="hover:bg-slate-50 transition-colors">
-                                        <td className="px-6 py-5 font-bold text-slate-700">{a.name}</td>
-                                        <td className="px-6 py-5 text-slate-500">{a.property}</td>
-                                        <td className="px-6 py-5">
-                                            <span className="flex items-center gap-2 text-indigo-600 font-medium">
-                                                <Calendar size={14} /> {a.date}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${a.status === 'Confirmed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
-                                                }`}>
-                                                {a.status}
-                                            </span>
-                                        </td>
+                    <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-slate-50/50 text-slate-400 text-[10px] uppercase tracking-[0.15em] font-black border-b border-slate-100">
+                                        <th className="px-8 py-5">Client Details</th>
+                                        <th className="px-6 py-5">Property</th>
+                                        <th className="px-6 py-5">Date & Time</th>
+                                        <th className="px-6 py-5">Status</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {appointmentdata?.length > 0 ? (
+                                        appointmentdata.map((a) => (
+                                            <tr key={a._id} className="group hover:bg-slate-50/80 transition-all">
+                                                {/* Client Details with Phone Number */}
+                                                <td className="px-8 py-5">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="h-10 w-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs">
+                                                            {a.userId?.fullName?.charAt(0)}
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-bold text-slate-800 text-sm leading-tight">{a.userId?.fullName || 'Unknown Client'}</p>
+                                                            <p className="text-[11px] text-slate-400">{a.email}</p>
+                                                            <p className="text-[10px] text-slate-500 font-medium">{a.userId?.phoneNumber || 'No Phone'}</p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                {/* Property with Image, Title, and Price */}
+                                                <td className="px-6 py-5">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="h-12 w-16 flex-shrink-0 bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
+                                                            <img
+                                                                src={a.propertyId?.image || 'https://via.placeholder.com/150'}
+                                                                alt="Property"
+                                                                className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-bold text-slate-700 text-sm leading-tight">{a.propertyId?.title || 'N/A'}</p>
+                                                            <p className="text-[10px] text-indigo-600 font-black uppercase tracking-tight">
+                                                                ₦{a.propertyId?.price?.toLocaleString()} • {a.propertyId?.location}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                {/* Date & Time */}
+                                                <td className="px-6 py-5">
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="flex items-center gap-2 text-slate-700 font-semibold text-sm">
+                                                            <Calendar size={14} className="text-indigo-500" />
+                                                            {new Date(a.date).toLocaleDateString('en-GB', {
+                                                                weekday: 'long',
+                                                                year: 'numeric',
+                                                                month: 'long',
+                                                                day: 'numeric'
+                                                            })}
+                                                        </span>
+                                                        <span className="flex items-center gap-2 text-slate-400 text-xs font-medium">
+                                                            <Clock size={14} /> {a.time || 'No time set'}
+                                                        </span>
+                                                    </div>
+                                                </td>
+
+                                                {/* Status and Short Message */}
+                                                <td className="px-6 py-5">
+                                                    <div className="flex flex-col gap-2">
+                                                        <span className={`inline-flex items-center w-fit px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${a.status === 'pending'
+                                                            ? 'bg-amber-50 text-amber-600 border border-amber-100'
+                                                            : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                                                            }`}>
+                                                            {a.status}
+                                                        </span>
+                                                        {a.message && (
+                                                            <p className="text-[10px] text-slate-400 italic truncate max-w-[100px]">
+                                                                "{a.message}"
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="4" className="px-8 py-20 text-center text-slate-400 italic">
+                                                {loadAppointment ? "Loading appointments..." : "No appointments found."}
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 )}
 
