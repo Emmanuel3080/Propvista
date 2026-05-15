@@ -19,6 +19,54 @@ const AppointmentProvider = ({ children }) => {
     const navigate = useNavigate()
     const [appointmentdata, showAppointment] = useState([])
     const [loadAppointment, setLoadingAppointment] = useState(false)
+    const [loadBooking, setBooking] = useState(false)
+
+
+
+
+    const BookAppointment = async (propertyId, agentId, selectedSlot) => {
+        setBooking(true)
+        const token = localStorage.getItem("AccessToken");
+
+        // Ensure we have a selection before sending
+        if (!selectedSlot.date || !selectedSlot.time) {
+            console.error("No date or time selected");
+            return;
+        }
+
+        try {
+            const response = await fetch(`${baseUrl}/users/appointment_book`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    propertyId,
+                    agentId,
+                    date: selectedSlot.date,
+                    time: selectedSlot.time
+                })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                toast.success(`${data.Message} Kindly check your mail for more information`)
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            }
+            else {
+                toast.error(data.Message)
+            }
+        } catch (error) {
+            console.log(error);
+        }
+        finally {
+            setBooking(false)
+        }
+    };
+
 
     const AgentAppointments = async () => {
         const token = localStorage.getItem("AgentAccessToken");
@@ -52,8 +100,13 @@ const AppointmentProvider = ({ children }) => {
             setLoadingAppointment(false)
         }
     }
+
+
+
     const appointmentValue = {
         AgentAppointments,
+        BookAppointment,
+        loadBooking,
         appointmentdata,
         loadAppointment
     }

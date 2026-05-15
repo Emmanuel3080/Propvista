@@ -10,21 +10,27 @@ import { useNavigate } from "react-router-dom";
 
 Modal.setAppElement("#root")
 
+
+import { toast } from "sonner";
+
+
+
 export default function AgentProperties() {
     const [modalOpen, setOpen] = useState(false);
     const [selectedPropertyId, setSelectedPropertyId] = useState(null);
 
     const { userInfo } = useContext(agentAuthContext)
 
-    const { AgentAppointments,
-        appointmentdata,
-        loadAppointment } = useContext(appointmentContext)
+    const { AgentAppointments, appointmentdata, loadAppointment, BookAppointment, loadBooking, } = useContext(appointmentContext)
 
     const { agentProperty, agentProp, showAgentProperty, deleteProperty, deleteProp, } = useContext(propertyContext)
     const [activeTab, setActiveTab] = useState("properties");
 
 
 
+
+
+    
 
 
     let subtitle;
