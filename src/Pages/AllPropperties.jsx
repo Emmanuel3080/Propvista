@@ -21,27 +21,25 @@ const AllPropperties = () => {
         <div>
             <Header />
 
-            <div className='flex items-center justify-between p-5'>
-                <h1 className='text-4xl font-semibold text-center p-6'>
-                    <span className="bg-clip-text bg-gradient-to-tr from-slate-800 to-emerald-300">Explore Properties</span>
+            <div className="flex items-center justify-between p-6 bg-slate-50/50 rounded-3xl">
+                {/* Title Section */}
+                <h1 className="text-4xl font-extrabold tracking-tight">
+                    <span className="bg-gradient-to-tr from-slate-800 to-emerald-500 bg-clip-text text-transparent">
+                        Explore Properties
+                    </span>
                 </h1>
 
-
+                {/* Stats Section */}
                 <div className="flex items-center gap-3">
-                    <div className="bg-white border border-slate-100 px-6 py-3 rounded-2xl shadow-sm flex flex-col items-end">
+                    <div className="flex flex-col items-end rounded-2xl border border-slate-100 bg-white px-6 py-3 shadow-sm transition-all hover:shadow-md">
                         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
                             Total Listings
                         </p>
-                        <div className="flex items-center gap-2">
-                            <p className="text-2xl font-black text-slate-800">
-                                {property.length}
-                            </p>
-                        </div>
+                        <p className="text-2xl font-black text-slate-800">
+                            {property?.length || 0}
+                        </p>
                     </div>
-
                 </div>
-
-
             </div>
 
             <div className="px-4 py-1">

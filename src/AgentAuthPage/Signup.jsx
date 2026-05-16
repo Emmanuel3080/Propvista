@@ -51,7 +51,6 @@ const AgentSignUp = () => {
             const url = URL.createObjectURL(file);
             setPreview(url);
 
-            // Clean up memory when component unmounts or file changes
             return () => URL.revokeObjectURL(url);
         }
     }, [profileImageFile]);

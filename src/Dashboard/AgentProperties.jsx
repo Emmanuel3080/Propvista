@@ -30,7 +30,7 @@ export default function AgentProperties() {
 
 
 
-    
+
 
 
     let subtitle;
@@ -311,8 +311,24 @@ export default function AgentProperties() {
 
                 {/* Appointments Tab */}
                 {activeTab === "appointments" && (
-                    <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div className="bg-white rounded-3xl shadow-xl border border-slate-400 overflow-hidden">
                         <div className="overflow-x-auto">
+                            <div className="flex items-center  gap-4 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+                                {/* Optional: Icon background */}
+                                <div className="rounded-lg bg-blue-50 p-3 text-blue-600">
+                                    {/* Insert a Calendar or Home icon here */}
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+
+                                <div>
+                                    <p className="text-sm font-medium text-gray-500">Booked Appointment</p>
+                                    <p className="text-2xl font-bold text-gray-900">
+                                        {appointmentdata?.length || 0}
+                                    </p>
+                                </div>
+                            </div>
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="bg-slate-50/50 text-slate-400 text-[10px] uppercase tracking-[0.15em] font-black border-b border-slate-100">

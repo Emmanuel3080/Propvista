@@ -4,6 +4,9 @@ import HeroSection from '../Components/HeroSection'
 import { propertyContext } from '../Contexts/PropertyContext'
 import PropertyCard from '../Components/PropertyCard'
 import FeaturedText from '../Components/FeaturedText'
+import AgentMatchRoadmap from '../Components/AgentMatch'
+import DashboardFooter from '../Common/DashboardFooter'
+import WhatWeOffer from '../Components/WhatWeOffer'
 
 const UserDashboard = () => {
 
@@ -59,7 +62,7 @@ const UserDashboard = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-            {property.slice(0,5).map((prop, index) => (
+            {property.slice(0, 5).map((prop, index) => (
               <div
                 key={prop._id || index}
                 className="transform transition duration-300 hover:-translate-y-1"
@@ -86,6 +89,16 @@ const UserDashboard = () => {
       </div>
 
 
+
+      <AgentMatchRoadmap />
+
+
+
+
+      <WhatWeOffer />
+
+
+      <DashboardFooter />
 
 
 
