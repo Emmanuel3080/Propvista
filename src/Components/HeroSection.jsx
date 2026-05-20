@@ -25,7 +25,7 @@ const HeroSection = () => {
 
                     <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
                         <button className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold rounded-xl transition-all transform hover:scale-105 shadow-xl shadow-emerald-500/20 cursor-pointer">
-                            Explore Properties
+                            <a href="/properties"> Explore Properties</a>
                         </button>
                         <button className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl backdrop-blur-md border border-white/30 transition-all cursor-pointer">
                             Learn More

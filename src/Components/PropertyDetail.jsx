@@ -30,7 +30,7 @@ import { appointmentContext } from '../Contexts/AppointmentContext';
 const appointmentSchema = yup.object({
   name: yup.string().required("Name Field Required"),
   email: yup.string().email("Inavlid Email").required("Email Field is Required"),
-  message: yup.string().required("Field is Required")
+  message: yup.string().required("Message Field is Required")
 
 })
 
@@ -66,15 +66,15 @@ const PropertyDetail = ({ property, onBack }) => {
   }
 
   const submitData = async (formData) => {
-    // ... existing logic ...
+    const { message, ...otherFormFields } = formData
     try {
       await BookAppointment(property._id, property.agent._id, {
         date: selectedDetails.date,
         time: selectedDetails.time,
-        ...formData
-      });
+        ...otherFormFields
+      },
+        message);
 
-      // Clear the selection for the next use
       setSelectedDetails({ date: null, time: null });
       // closeModal();
     } catch (error) {
@@ -148,12 +148,10 @@ const PropertyDetail = ({ property, onBack }) => {
             </button>
           </div>
 
-          {/* ... inside the Modal ... */}
           <form onSubmit={handleSubmit(submitData, handleErr)}>
             <div className="overflow-y-auto px-8 py-1 scrollbar-thin">
-              <div className="space-y-6"> {/* Reduced spacing for better fit */}
+              <div className="space-y-6">
 
-                {/* 1. Date/Time Selector - Ensure buttons inside this have type="button" */}
                 <section>
                   <AppointmentBooking
                     availableSlots={property.availableSlots}
@@ -198,18 +196,24 @@ const PropertyDetail = ({ property, onBack }) => {
               </div>
             </div>
 
-            {/* Sticky Footer */}
             <div className="p-8 border-t border-slate-50 bg-white">
               <button
-                className="w-full py-4 bg-slate-900 text-white text-sm font-bold rounded-2xl hover:bg-black transition-all active:scale-[0.98] shadow-xl"
-                type="submit" // This is the ONLY button that should have type="submit"
+                type="submit"
+                className={`w-full py-4 rounded-xl mt-4 flex items-center justify-center gap-2 text-white font-semibold transition-all 
+                                    ${loadBooking ? "bg-gray-500 cursor-not-allowed" : "bg-slate-900 hover:bg-slate-700 cursor-pointer "}`}
                 disabled={loadBooking}
               >
-                {loadBooking ? "Booking Appointment...." : "Confirm Appointment"}
+                {loadBooking ? (
+                  <>
+                  <span>Booking</span>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  </>
+                ) : (
+                  "Confirm Appointment"
+                )}
               </button>
             </div>
           </form>
-          {/* Scrollable Body */}
         </Modal>
         <img
           src={property.image}

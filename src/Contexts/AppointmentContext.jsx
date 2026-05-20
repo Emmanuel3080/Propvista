@@ -20,11 +20,13 @@ const AppointmentProvider = ({ children }) => {
     const [appointmentdata, showAppointment] = useState([])
     const [loadAppointment, setLoadingAppointment] = useState(false)
     const [loadBooking, setBooking] = useState(false)
+    const [loadApproval, setApproval] = useState(null)
+    const [loadCancel, setCancellation] = useState(null)
 
 
 
 
-    const BookAppointment = async (propertyId, agentId, selectedSlot) => {
+    const BookAppointment = async (propertyId, agentId, selectedSlot, message) => {
         setBooking(true)
         const token = localStorage.getItem("AccessToken");
 
@@ -45,7 +47,8 @@ const AppointmentProvider = ({ children }) => {
                     propertyId,
                     agentId,
                     date: selectedSlot.date,
-                    time: selectedSlot.time
+                    time: selectedSlot.time,
+                    message: message
                 })
             });
 
@@ -103,9 +106,76 @@ const AppointmentProvider = ({ children }) => {
 
 
 
+    const approveAppoinment = async (id) => {
+        setApproval(id)
+        const token = localStorage.getItem("AgentAccessToken");
+        try {
+
+            const response = await fetch(`${baseUrl}/agent/appointment/confirm/${id}`, {
+                method: "PATCH",
+                headers: {
+                    authorization: `Bearer ${token}`
+                }
+            })
+            const data = await response.json()
+            if (response.ok) {
+                toast.success(data.Message)
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            }
+            else {
+                toast.error(data.Message)
+            }
+        } catch (error) {
+            console.log(error);
+
+        }
+        finally {
+            setApproval(null)
+        }
+    }
+
+
+
+    const cancelAppointment = async (id) => {
+
+        setCancellation(id)
+        const token = localStorage.getItem("AgentAccessToken");
+        try {
+            const response = await fetch(`${baseUrl}/agent/appointment/cancel/${id}`, {
+                method: "PATCH",
+                headers: {
+                    authorization: `Bearer ${token}`
+                }
+            })
+            const data = await response.json()
+            if (response.ok) {
+                toast.success(data.Message)
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            }
+            else {
+                toast.error(data.Message)
+            }
+
+
+        } catch (error) {
+            console.log(error);
+
+        }
+        finally {
+            setCancellation(null)
+        }
+    }
     const appointmentValue = {
         AgentAppointments,
         BookAppointment,
+        approveAppoinment,
+        cancelAppointment,
+        loadCancel,
+        loadApproval,
         loadBooking,
         appointmentdata,
         loadAppointment

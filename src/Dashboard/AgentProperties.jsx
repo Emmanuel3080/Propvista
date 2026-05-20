@@ -9,7 +9,7 @@ import ReactDom from "react-dom";
 import { useNavigate } from "react-router-dom";
 
 Modal.setAppElement("#root")
-
+     
 
 import { toast } from "sonner";
 
@@ -21,7 +21,9 @@ export default function AgentProperties() {
 
     const { userInfo } = useContext(agentAuthContext)
 
-    const { AgentAppointments, appointmentdata, loadAppointment, BookAppointment, loadBooking, } = useContext(appointmentContext)
+    const { AgentAppointments, appointmentdata, loadAppointment, BookAppointment, loadBooking, approveAppoinment,
+        loadApproval, cancelAppointment,
+        loadCancel, } = useContext(appointmentContext)
 
     const { agentProperty, agentProp, showAgentProperty, deleteProperty, deleteProp, } = useContext(propertyContext)
     const [activeTab, setActiveTab] = useState("properties");
@@ -66,15 +68,7 @@ export default function AgentProperties() {
         }
     }, [userInfo]);
     console.log(appointmentdata);
-    // Added dependencies
 
-    //     { id: 2, title: "Modern Duplex", location: "Ikeja, Lagos", price: "₦750,000", image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400" },
-    // ];
-
-    // const appointments = [
-    //     { id: 1, name: "John Doe", property: "Luxury Apartment", date: "May 12, 2026", status: "Confirmed" },
-    //     { id: 2, name: "Jane Smith", property: "Modern Duplex", date: "May 14, 2026", status: "Pending" },
-    // ];
 
     const navItems = [
         { id: "properties", label: "My Properties", icon: Home },
@@ -289,9 +283,9 @@ export default function AgentProperties() {
                                                     <span className="text-[10px] uppercase tracking-tight">Bookings</span>
                                                 </button>
 
-                                                <button className="flex-1 flex justify-center items-center gap-2 py-2.5 bg-slate-50 hover:bg-indigo-600 text-indigo-700 hover:text-white rounded-xl font-bold transition-all duration-200 group/btn">
+                                                <button className="flex-1 flex justify-center items-center gap-2 py-2.5 bg-slate-50 hover:bg-indigo-600 text-indigo-700 hover:text-white rounded-xl font-bold transition-all duration-200 group/btn cursor-pointer">
                                                     <Edit3 size={14} />
-                                                    <span className="text-[10px] uppercase tracking-tight">Edit</span>
+                                                    <a href={`property/update/${p._id}`} className="text-[10px] uppercase tracking-tight p-1">Edit</a>
                                                 </button>
 
                                                 <button className="px-3 py-2.5 bg-rose-50 hover:bg-rose-500 text-rose-500 hover:text-white rounded-xl transition-all duration-200" onClick={() => {
@@ -313,50 +307,52 @@ export default function AgentProperties() {
                 {activeTab === "appointments" && (
                     <div className="bg-white rounded-3xl shadow-xl border border-slate-400 overflow-hidden">
                         <div className="overflow-x-auto">
-                            <div className="flex items-center  gap-4 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-                                {/* Optional: Icon background */}
+                            <div className="flex items-center gap-4 rounded-xl border border-gray-100 bg-white p-5 shadow-sm m-4 mb-2">
                                 <div className="rounded-lg bg-blue-50 p-3 text-blue-600">
-                                    {/* Insert a Calendar or Home icon here */}
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                 </div>
-
                                 <div>
-                                    <p className="text-sm font-medium text-gray-500">Booked Appointment</p>
+                                    <p className="text-sm font-medium text-gray-500">Booked Appointments</p>
                                     <p className="text-2xl font-bold text-gray-900">
                                         {appointmentdata?.length || 0}
                                     </p>
                                 </div>
                             </div>
-                            <table className="w-full text-left border-collapse">
+
+                            {/* Main Data Table */}
+                            <table className="w-full text-left border-collapse min-w-[800px]">
                                 <thead>
                                     <tr className="bg-slate-50/50 text-slate-400 text-[10px] uppercase tracking-[0.15em] font-black border-b border-slate-100">
                                         <th className="px-8 py-5">Client Details</th>
                                         <th className="px-6 py-5">Property</th>
                                         <th className="px-6 py-5">Date & Time</th>
                                         <th className="px-6 py-5">Status</th>
+                                        <th className="px-6 py-5 text-center">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-50">
                                     {appointmentdata?.length > 0 ? (
                                         appointmentdata.map((a) => (
                                             <tr key={a._id} className="group hover:bg-slate-50/80 transition-all">
-                                                {/* Client Details with Phone Number */}
+                                                {/* Client Details */}
                                                 <td className="px-8 py-5">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="h-10 w-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs">
-                                                            {a.userId?.fullName?.charAt(0)}
+                                                        <div className="h-10 w-10 flex-shrink-0 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs uppercase">
+                                                            {a.userId?.fullName?.charAt(0) || '?'}
                                                         </div>
                                                         <div>
-                                                            <p className="font-bold text-slate-800 text-sm leading-tight">{a.userId?.fullName || 'Unknown Client'}</p>
-                                                            <p className="text-[11px] text-slate-400">{a.email}</p>
-                                                            <p className="text-[10px] text-slate-500 font-medium">{a.userId?.phoneNumber || 'No Phone'}</p>
+                                                            <p className="font-bold text-slate-800 text-sm leading-tight">
+                                                                {a.userId?.fullName || 'Unknown Client'}
+                                                            </p>
+                                                            <p className="text-[11px] text-slate-400">{a.email || 'No email specified'}</p>
+                                                            <p className="text-[10px] text-slate-500 font-medium">{a.userId?.phoneNumber || 'No phone number'}</p>
                                                         </div>
                                                     </div>
                                                 </td>
 
-                                                {/* Property with Image, Title, and Price */}
+                                                {/* Property Details */}
                                                 <td className="px-6 py-5">
                                                     <div className="flex items-center gap-3">
                                                         <div className="h-12 w-16 flex-shrink-0 bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
@@ -364,12 +360,15 @@ export default function AgentProperties() {
                                                                 src={a.propertyId?.image || 'https://via.placeholder.com/150'}
                                                                 alt="Property"
                                                                 className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                                                                onError={(e) => { e.target.src = 'https://via.placeholder.com/150'; }}
                                                             />
                                                         </div>
-                                                        <div>
-                                                            <p className="font-bold text-slate-700 text-sm leading-tight">{a.propertyId?.title || 'N/A'}</p>
-                                                            <p className="text-[10px] text-indigo-600 font-black uppercase tracking-tight">
-                                                                ₦{a.propertyId?.price?.toLocaleString()} • {a.propertyId?.location}
+                                                        <div className="max-w-[200px]">
+                                                            <p className="font-bold text-slate-700 text-sm leading-tight truncate">
+                                                                {a.propertyId?.title || 'N/A'}
+                                                            </p>
+                                                            <p className="text-[10px] text-indigo-600 font-black uppercase tracking-tight truncate">
+                                                                ₦{a.propertyId?.price?.toLocaleString() || '0'} • {a.propertyId?.location || 'Unknown Location'}
                                                             </p>
                                                         </div>
                                                     </div>
@@ -378,34 +377,66 @@ export default function AgentProperties() {
                                                 {/* Date & Time */}
                                                 <td className="px-6 py-5">
                                                     <div className="flex flex-col gap-1">
-                                                        <span className="flex items-center gap-2 text-slate-700 font-semibold text-sm">
-                                                            <Calendar size={14} className="text-indigo-500" />
-                                                            {new Date(a.date).toLocaleDateString('en-GB', {
-                                                                weekday: 'long',
+                                                        <span className="flex items-center gap-2 text-slate-700 font-semibold text-sm whitespace-nowrap">
+                                                            <Calendar size={14} className="text-indigo-500 flex-shrink-0" />
+                                                            {a.date ? new Date(a.date).toLocaleDateString('en-GB', {
+                                                                weekday: 'short',
                                                                 year: 'numeric',
-                                                                month: 'long',
+                                                                month: 'short',
                                                                 day: 'numeric'
-                                                            })}
+                                                            }) : 'Date not set'}
                                                         </span>
                                                         <span className="flex items-center gap-2 text-slate-400 text-xs font-medium">
-                                                            <Clock size={14} /> {a.time || 'No time set'}
+                                                            <Clock size={14} className="flex-shrink-0" /> {a.time || 'No time set'}
                                                         </span>
                                                     </div>
                                                 </td>
 
-                                                {/* Status and Short Message */}
+                                                {/* Status Badge */}
                                                 <td className="px-6 py-5">
-                                                    <div className="flex flex-col gap-2">
-                                                        <span className={`inline-flex items-center w-fit px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${a.status === 'pending'
-                                                            ? 'bg-amber-50 text-amber-600 border border-amber-100'
-                                                            : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className={`inline-flex items-center w-fit px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${a.status === 'approved' || a.status === 'confirmed'
+                                                            ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                                            : a.status === 'pending'
+                                                                ? 'bg-amber-50 text-amber-600 border-amber-100'
+                                                                : 'bg-rose-50 text-rose-600 border-rose-100'
                                                             }`}>
-                                                            {a.status}
+                                                            {a.status || 'unknown'}
                                                         </span>
-                                                        {a.message && (
-                                                            <p className="text-[10px] text-slate-400 italic truncate max-w-[100px]">
+                                                        {a.message ? (
+                                                            <p className="text-sm text-slate-900 italic max-w-[200px] truncate" title={a.message}>
                                                                 "{a.message}"
                                                             </p>
+                                                        ) : (
+                                                            <span className="text-xs text-red-400">No message data found in 'a.message'</span>
+                                                        )}
+                                                    </div>
+                                                </td>
+
+                                                {/* Table Actions Panel */}
+                                                <td className="px-6 py-5">
+                                                    <div className="flex items-center justify-center gap-2 min-w-[150px]">
+                                                        {a.status === 'pending' ? (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => approveAppoinment(a._id)}
+                                                                    disabled={loadApproval !== null}
+                                                                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white font-bold text-xs rounded-lg transition-all shadow-sm hover:shadow active:scale-95 disabled:scale-100 disabled:cursor-not-allowed whitespace-nowrap"
+                                                                >
+                                                                    {loadApproval === a?._id ? "Processing..." : "Approve"}
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => cancelAppointment(a._id)}
+                                                                    className="px-3 py-1.5 bg-white hover:bg-rose-50 disabled:bg-white text-rose-600 disabled:text-slate-400 border border-rose-200 hover:border-rose-300 disabled:border-slate-200 font-bold text-xs rounded-lg transition-all active:scale-95 disabled:scale-100 disabled:cursor-not-allowed"
+                                                                    disabled={loadCancel !== null}
+                                                                >
+                                                                    {loadCancel === a?._id ? "Processing..." : "Cancel"}
+                                                                </button>
+                                                            </>
+                                                        ) : (
+                                                            <span className="text-xs text-slate-400 font-medium italic select-none">
+                                                                No Actions Available
+                                                            </span>
                                                         )}
                                                     </div>
                                                 </td>
@@ -413,8 +444,15 @@ export default function AgentProperties() {
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan="4" className="px-8 py-20 text-center text-slate-400 italic">
-                                                {loadAppointment ? "Loading appointments..." : "No appointments found."}
+                                            <td colSpan="5" className="px-8 py-20 text-center text-slate-400 italic">
+                                                {loadAppointment ? (
+                                                    <div className="flex items-center justify-center gap-2 text-slate-500 font-medium">
+                                                        Loading appointments
+                                                        <span className="h-4 w-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></span>
+                                                    </div>
+                                                ) : (
+                                                    "No appointments found."
+                                                )}
                                             </td>
                                         </tr>
                                     )}
@@ -423,6 +461,27 @@ export default function AgentProperties() {
                         </div>
                     </div>
                 )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                 {activeTab === "stats" && (
                     <div className="grid md:grid-cols-3 gap-6">

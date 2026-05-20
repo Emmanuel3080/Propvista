@@ -17,6 +17,7 @@ const PropertyProvider = ({ children }) => {
     const [addingProperty, setAddProperty] = useState(false)
     const [singleProp, setSingleProp] = useState({})
     const [deleteProp, setDelete] = useState(false)
+    const [updateProp, setUpdateProp] = useState(false)
 
 
     const navigate = useNavigate()
@@ -175,12 +176,58 @@ const PropertyProvider = ({ children }) => {
         }
     }
 
+
+
+
+    const updateProperty = async (propertyData,id) => {
+        setUpdateProp(true)
+        try {
+            const payload = new FormData()
+            payload.append("title", propertyData.title)
+            payload.append("description", propertyData.description)
+            payload.append("price", propertyData.price)
+            payload.append("location", propertyData.location)
+            payload.append("propertyType", propertyData.propertyType)
+            payload.append("bedrooms", propertyData.bedrooms)
+            payload.append('availableSlots', JSON.stringify(propertyData.availableSlots));
+
+            if (propertyData.image && propertyData.image[0]) {
+                payload.append("image", propertyData.image[0])
+            }
+            const response = await fetch(`${baseUrl}/agent/property/update/${id}`, {
+                method: "PATCH",
+                headers: {
+                    authorization: `Bearer ${localStorage.getItem("AgentAccessToken")}`
+                },
+                body: payload
+            })
+            const data = await response.json()
+
+            if (response.ok) {
+                toast.success(data.Message)
+                navigate("/dashboard")
+            }
+            else {
+                toast.error(data.Message)
+            }
+        }
+        catch (error) {
+            console.log(error);
+        }
+        finally {
+            setUpdateProp(false)
+        }
+    }
+
+
     const propertyValue = {
         fetchProperties,
         agentProperty,
         postProperty,
         singleProperty,
         deleteProperty,
+        updateProperty,
+        updateProp,
         deleteProp,
         addingProperty,
         property,

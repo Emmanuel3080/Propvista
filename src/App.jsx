@@ -20,6 +20,7 @@ import PostProperty from './Pages/PostProperty'
 import SinglePropertyPage from './Pages/SinglePropertyPage'
 import AllPropperties from './Pages/AllPropperties'
 import AppointmentProvider from './Contexts/AppointmentContext'
+import UpdateProperty from './Components/UpdateProperty'
 
 
 function App() {
@@ -76,6 +77,7 @@ function App() {
                     <Route path='/dashboard' element={<AgentDashboard />} />
                     <Route path="/post-job" element={<PostProperty />}
                     />
+                    <Route path='property/update/:propertyId' element={<UpdateProperty />} />
                   </Route>
 
 

@@ -1,14 +1,13 @@
-import React, { useContext } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
-import PropVistaHeader from '../Common/AdminHeader';
-import { agentAuthContext } from '../Contexts/AgentAuthContext';
-import TimeSlotsInput from '../Components/TimeSlotsInput';
-
+import React, { useContext, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import { agentAuthContext } from '../Contexts/AgentAuthContext'
+import PropVistaHeader from '../Common/AdminHeader'
+import { useFieldArray, useForm } from 'react-hook-form'
 import * as yup from "yup"
-import { yupResolver } from "@hookform/resolvers/yup"
-import { toast } from 'sonner';
-import { propertyContext } from '../Contexts/PropertyContext';
-
+import { yupResolver } from '@hookform/resolvers/yup'
+import { propertyContext } from '../Contexts/PropertyContext'
+import TimeSlotsInput from './TimeSlotsInput'
+import { toast } from 'sonner'
 
 const propertySchema = yup.object().shape({
     title: yup.string().required("Title is required"),
@@ -21,8 +20,7 @@ const propertySchema = yup.object().shape({
     // Validating the nested Slots
     availableSlots: yup.array().of(
         yup.object().shape({
-            date: yup.string()
-                .required("Date is required"),
+            date: yup.string().required("Date is required"),
             times: yup.array()
                 .of(yup.string().required("Time slot cannot be empty"))
                 .min(1, "At least one time slot is required for each date")
@@ -30,14 +28,12 @@ const propertySchema = yup.object().shape({
     )
 });
 
+const UpdateProperty = () => {
+    const { propertyId } = useParams()
+    const { userInfo } = useContext(agentAuthContext)
+    const { updateProperty, updateProp, singleProp, singleProperty } = useContext(propertyContext)
 
-
-
-const PostPropertyForm = () => {
-    const { userInfo } = useContext(agentAuthContext);
-    const { postProperty, addingProperty, } = useContext(propertyContext)
-
-    const { register, control, handleSubmit, setValue, watch, formState: { errors } } = useForm({
+    const { register, control, handleSubmit, watch, reset, formState: { errors } } = useForm({
         defaultValues: {
             title: '',
             description: '',
@@ -46,16 +42,45 @@ const PostPropertyForm = () => {
             propertyType: 'apartment',
             bedrooms: 0,
             image: '',
-            availableSlots: [] // Starts empty
+            availableSlots: []
         },
         resolver: yupResolver(propertySchema)
-
     });
-    // console.log(errors);
 
+    useEffect(() => {
+        if (propertyId) {
+            singleProperty(propertyId)
+        }
+    }, [propertyId])
+
+    useEffect(() => {
+        if (singleProp) {
+            reset({
+                title: singleProp.title || '',
+                description: singleProp.description || '',
+                price: singleProp.price || '',
+                location: singleProp.location || '',
+                propertyType: singleProp.propertyType || 'apartment',
+                bedrooms: singleProp.bedrooms || 0,
+                availableSlots: singleProp.availableSlots || [],
+                image: "" // Reset local file selection
+            });
+        }
+    }, [singleProp, reset])
+
+    const onSubmit = async (data) => {
+        try {
+            await updateProperty(data, propertyId)
+        } catch (error) {
+            console.log(error);
+        }
+    }
     const handleErr = (formErr) => {
-        const firstErr = Object.values(formErr)[0].message
-        toast.error(firstErr)
+        const errorValues = Object.values(formErr);
+        if (errorValues.length > 0) {
+            const firstErr = errorValues[0].message
+            toast.error(firstErr)
+        }
     }
 
 
@@ -65,29 +90,25 @@ const PostPropertyForm = () => {
         name: "availableSlots"
     });
 
-    // const onSubmit = async (data) => {
-    //     const finalData = { ...data, agent: userInfo?._id };
-    // };
-
     return (
         <div>
-            <PropVistaHeader showPostButton={false} showSearch={false} />
-            <div className="max-w-6xl mx-auto p-4 md:p-2" style={{ fontFamily: "'Syne', sans-serif" }}>
+            <PropVistaHeader showSearch={false} showPostButton={false} />
+
+            <div className="max-w-6xl mx-auto p-1 md:p-2" style={{ fontFamily: "'Syne', sans-serif" }}>
                 <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
 
                     <div className="bg-slate-600 p-8 text-white">
-                        <h2 className="text-2xl font-black uppercase tracking-tight">List New Property</h2>
-                        <p className="text-slate-400 text-xs uppercase tracking-widest mt-2">Fill in the details to reach potential clients</p>
+                        <h2 className="text-2xl font-black uppercase tracking-tight">Update Property</h2>
                     </div>
 
-                    <form onSubmit={handleSubmit(postProperty, handleErr)} className="p-6 md:p-10 space-y-6">
+                    <form onSubmit={handleSubmit(onSubmit, handleErr)} className="p-6 md:p-10 space-y-6">
 
                         {/* Basic Info Group */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="flex flex-col gap-2">
                                 <label className="text-[11px] font-bold uppercase text-slate-500 ml-1">Property Title</label>
                                 <input
-                                    {...register("title", { required: true })}
+                                    {...register("title")}
                                     placeholder="e.g. Modern 3-Bedroom Villa"
                                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 transition-all"
                                 />
@@ -108,7 +129,7 @@ const PostPropertyForm = () => {
                                 <label className="text-[11px] font-bold uppercase text-slate-500 ml-1">Price ($)</label>
                                 <input
                                     type="number"
-                                    {...register("price", { required: true })}
+                                    {...register("price")}
                                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 transition-all"
                                 />
                             </div>
@@ -139,19 +160,17 @@ const PostPropertyForm = () => {
                         <div className="flex flex-col gap-2">
                             <label className="text-[11px] font-bold uppercase text-slate-500 ml-1">Description</label>
                             <textarea
-                                {...register("description", { required: true })}
+                                {...register("description")}
                                 rows="4"
                                 placeholder="Describe the property..."
                                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 transition-all"
                             />
                         </div>
+
                         {/* Property Image */}
                         <div className="flex flex-col gap-2">
-                            <label className="text-[11px] font-bold uppercase text-slate-500 ml-1">
-                                Property Image
-                            </label>
-                            <div className={`relative flex items-center justify-center w-full border-2 border-dashed rounded-2xl p-4 transition-all ${errors.image ? "border-red-400 bg-red-50" : "border-slate-200 bg-slate-50 hover:border-emerald-400"
-                                }`}>
+                            <label className="text-[11px] font-bold uppercase text-slate-500 ml-1">Property Image</label>
+                            <div className={`relative flex items-center justify-center w-full border-2 border-dashed rounded-2xl p-4 transition-all ${errors.image ? "border-red-400 bg-red-50" : "border-slate-200 bg-slate-50 hover:border-emerald-400"}`}>
                                 <input
                                     type="file"
                                     accept="image/*"
@@ -201,7 +220,6 @@ const PostPropertyForm = () => {
                                                 />
                                             </div>
 
-                                            {/* Nested Time Slots Array */}
                                             <div className="flex-[2]">
                                                 <TimeSlotsInput
                                                     nestIndex={index}
@@ -219,16 +237,16 @@ const PostPropertyForm = () => {
                             <button
                                 type="submit"
                                 className={`w-full py-4 rounded-xl mt-4 flex items-center justify-center gap-2 text-white font-semibold transition-all 
-                            ${addingProperty ? "bg-gray-500 cursor-not-allowed" : "bg-slate-900 hover:bg-slate-700 cursor-pointer "}`}
-                                disabled={addingProperty}
+                                    ${updateProp ? "bg-gray-500 cursor-not-allowed" : "bg-slate-900 hover:bg-slate-700 cursor-pointer "}`}
+                                disabled={updateProp}
                             >
-                                {addingProperty ? (
+                                {updateProp ? (
                                     <>
-                                        <span>Processing</span>
+                                        <span>Updating</span>
                                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                     </>
                                 ) : (
-                                    "Publish Property"
+                                    "Update Property"
                                 )}
                             </button>
                         </div>
@@ -236,7 +254,7 @@ const PostPropertyForm = () => {
                 </div>
             </div>
         </div>
-    );
-};
+    )
+}
 
-export default PostPropertyForm
+export default UpdateProperty
