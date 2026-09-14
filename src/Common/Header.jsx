@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authContext } from '../Contexts/UserAuthContext';
+import logo from "../assets/propvista_logo.png"
 
 const Header = () => {
     const { userInfo, logout } = useContext(authContext);
@@ -9,12 +10,11 @@ const Header = () => {
 
     const navLinks = [
         { name: 'Home', path: '/' },
-        { name: 'Appointments', path: '/applications' },
+        { name: 'About Us', path: '/about' },
         { name: 'View Properties', path: '/properties' },
     ];
 
     const handleLogout = () => {
-        // logout(); // Uncomment this when your context is ready
         setMenuOpen(false);
         navigate('/signin');
     };
@@ -23,10 +23,9 @@ const Header = () => {
         <header className="bg-white/80 backdrop-blur-md text-slate-900 shadow-sm sticky top-0 z-50 border-b border-slate-200">
             <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
 
-                {/* Logo & Desktop Nav */}
                 <div className="flex items-center gap-8">
                     <Link to="/" className="text-3xl font-extrabold tracking-tight">
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-900 to-slate-900">Propvista</span>
+                        <img src={logo} alt="" width={200} height={200} />
                     </Link>
 
                     <nav className="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600">
@@ -42,7 +41,6 @@ const Header = () => {
                     </nav>
                 </div>
 
-                {/* Desktop User Info & Logout */}
                 <div className="hidden md:flex items-center gap-4">
                     <div className="flex flex-col items-end pr-4 border-r border-slate-200">
                         <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Account</p>
@@ -60,7 +58,6 @@ const Header = () => {
                     </button>
                 </div>
 
-                {/* Mobile Toggle Button */}
                 <button
                     className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
                     onClick={() => setMenuOpen(!menuOpen)}
@@ -70,12 +67,10 @@ const Header = () => {
                 </button>
             </div>
 
-            {/* Mobile Menu Overlay */}
             {menuOpen && (
                 <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-slate-200 shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="p-6 space-y-6">
 
-                        {/* Mobile User Identity (Added this for you) */}
                         <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl">
                             <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
                                 {userInfo?.fullName ? userInfo.fullName[0] : "G"}

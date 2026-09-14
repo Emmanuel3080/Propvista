@@ -110,6 +110,13 @@ const AuthProvider = ({ children }) => {
         }
     }
 
+    const logout = async () => {
+        try {
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     const authValue = {
         handleSignUp,

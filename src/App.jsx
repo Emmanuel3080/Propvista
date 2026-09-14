@@ -21,6 +21,7 @@ import SinglePropertyPage from './Pages/SinglePropertyPage'
 import AllPropperties from './Pages/AllPropperties'
 import AppointmentProvider from './Contexts/AppointmentContext'
 import UpdateProperty from './Components/UpdateProperty'
+import AboutUs from './Pages/AboutUs'
 
 
 function App() {
@@ -64,6 +65,7 @@ function App() {
                     <Route path='/' element={<UserDashboard />} />
                     <Route path='/single/:id' element={<SinglePropertyPage />} />
                     <Route path='/properties' element={<AllPropperties />} />
+                    <Route path='/about' element={<AboutUs />} />
                   </Route>
 
 

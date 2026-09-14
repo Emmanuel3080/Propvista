@@ -45,7 +45,6 @@ export default function AgentProperties() {
     return (
         <div className="min-h-screen bg-slate-50 flex font-sans text-slate-900">
 
-            {/* ── Desktop Sidebar ── */}
             <aside className="w-52 bg-white border-r border-slate-200 hidden md:flex flex-col sticky top-0 h-screen">
                 <Modal
                     isOpen={modalOpen}
@@ -115,11 +114,8 @@ export default function AgentProperties() {
                 </div>
             </aside>
 
-            {/* ── Main Content ── */}
-            {/* pb-20 gives space for the mobile bottom nav */}
             <main className="flex-1 p-4 md:p-5 overflow-y-auto pb-20 md:pb-5">
 
-                {/* Mobile top bar with logo */}
                 <div className="flex items-center gap-2 mb-6 md:hidden">
                     <div className="bg-slate-400 p-1.5 rounded-lg">
                         <Home className="text-white" size={20} />
@@ -142,7 +138,6 @@ export default function AgentProperties() {
                     </div>
                 </header>
 
-                {/* ── Properties Tab ── */}
                 {activeTab === "properties" && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
                         {showAgentProperty ? (
@@ -220,7 +215,6 @@ export default function AgentProperties() {
                     </div>
                 )}
 
-                {/* ── Appointments Tab ── */}
                 {activeTab === "appointments" && (
                     <div className="bg-white rounded-3xl shadow-xl border border-slate-400 overflow-hidden">
                         <div className="overflow-x-auto">
