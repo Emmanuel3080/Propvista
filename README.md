@@ -57,4 +57,9 @@ npm run dev
 
 Distributed under the MIT License.
 
+
+Contact
+
+EmmyCodes — Full Stack Developer  GitHub: @Emmanuel3080 · Email: emmanuelabiodun041@gmail.com
+
 </div>
