@@ -8,7 +8,7 @@
 
 Buyers book property viewings with agents. Agents manage availability and bookings — all in one place.
 
-[Live Demo](#) · [Report Bug](#) · [Request Feature](#)
+[Live Demo](https://propvista-gilt.vercel.app/)
 
 </div>
 
@@ -60,6 +60,6 @@ Distributed under the MIT License.
 
 Contact
 
-EmmyCodes — Full Stack Developer  GitHub: @Emmanuel3080 · Email: emmanuelabiodun041@gmail.com
+EmmyCodes — Full Stack Developer  GitHub: (https://github.com/Emmanuel3080) · Email: emmanuelabiodun041@gmail.com
 
 </div>
