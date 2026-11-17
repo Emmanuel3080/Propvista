@@ -1,27 +1,19 @@
-import React, { useContext, useEffect } from 'react'
-import { agentAuthContext } from '../Contexts/AgentAuthContext'
-import { Outlet, useNavigate } from 'react-router-dom'
-import PropVistaHeader from '../Common/AdminHeader'
-import AgentProperties from './AgentProperties'
+import React, { useState } from 'react';
+import PropVistaHeader from '../Common/AdminHeader';
+import AgentProperties from './AgentProperties';
 
 const AgentDashboard = () => {
-
-
-    const { userInfo } = useContext(agentAuthContext)
-    // console.log(userInfo);
+    const [searchQuery, setSearchQuery] = useState("");
 
     return (
-        <div>
-
-            <PropVistaHeader />
-
-          <AgentProperties />
-
-
-
-
+        <div className="min-h-screen bg-[#F9F8F6] text-[#1A1A1A]">
+            <PropVistaHeader
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+            />
+            <AgentProperties searchQuery={searchQuery} />
         </div>
-    )
-}
+    );
+};
 
-export default AgentDashboard
+export default AgentDashboard;

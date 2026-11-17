@@ -2,6 +2,7 @@ import { createContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const authContext = createContext()
 
 
@@ -110,9 +111,12 @@ const AuthProvider = ({ children }) => {
         }
     }
 
-    const logout = async () => {
+    const logout = () => {
         try {
-
+            localStorage.removeItem("AccessToken")
+            setUserInfo({})
+            toast.success("Logged out successfully")
+            navigate("/signin")
         } catch (error) {
             console.log(error);
         }
@@ -122,6 +126,7 @@ const AuthProvider = ({ children }) => {
         handleSignUp,
         handleSignIn,
         checkAuthState,
+        logout,
         loading,
         loadingLogin,
         userInfo

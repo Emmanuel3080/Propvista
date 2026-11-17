@@ -1,43 +1,54 @@
 import React, { useContext } from 'react';
+import { Link } from 'react-router-dom';
 import { useForm, useFieldArray } from 'react-hook-form';
+import { ChevronLeft, UploadCloud, Plus, Trash2, Calendar } from 'lucide-react';
 import PropVistaHeader from '../Common/AdminHeader';
-import { agentAuthContext } from '../Contexts/AgentAuthContext';
 import TimeSlotsInput from '../Components/TimeSlotsInput';
-
-import * as yup from "yup"
-import { yupResolver } from "@hookform/resolvers/yup"
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { toast } from 'sonner';
 import { propertyContext } from '../Contexts/PropertyContext';
-
 
 const propertySchema = yup.object().shape({
     title: yup.string().required("Title is required"),
     location: yup.string().required("Location is required"),
-    price: yup.number().typeError("Price must be a number").required("Price is required").positive("Price must be greater than zero"),
-    propertyType: yup.string().oneOf(['apartment', 'duplex', 'bungalow', 'land', 'commercial']).required("Property type is Required"),
-    bedrooms: yup.number().min(0, "Cannot be negative").integer().required("Number of Bedroom is Required"),
+    price: yup
+        .number()
+        .typeError("Price must be a number")
+        .required("Price is required")
+        .positive("Price must be greater than zero"),
+    propertyType: yup
+        .string()
+        .oneOf(['apartment', 'duplex', 'bungalow', 'land', 'commercial'])
+        .required("Property type is Required"),
+    bedrooms: yup
+        .number()
+        .min(0, "Cannot be negative")
+        .integer()
+        .required("Number of Bedroom is Required"),
     description: yup.string().required("Description is required"),
 
-    // Validating the nested Slots
     availableSlots: yup.array().of(
         yup.object().shape({
-            date: yup.string()
-                .required("Date is required"),
-            times: yup.array()
+            date: yup.string().required("Date is required"),
+            times: yup
+                .array()
                 .of(yup.string().required("Time slot cannot be empty"))
-                .min(1, "At least one time slot is required for each date")
+                .min(1, "At least one time slot is required for each date"),
         })
-    )
+    ),
 });
 
-
-
-
 const PostPropertyForm = () => {
-    const { userInfo } = useContext(agentAuthContext);
-    const { postProperty, addingProperty, } = useContext(propertyContext)
+    const { postProperty, addingProperty } = useContext(propertyContext);
 
-    const { register, control, handleSubmit, setValue, watch, formState: { errors } } = useForm({
+    const {
+        register,
+        control,
+        handleSubmit,
+        watch,
+        formState: { errors },
+    } = useForm({
         defaultValues: {
             title: '',
             description: '',
@@ -46,77 +57,113 @@ const PostPropertyForm = () => {
             propertyType: 'apartment',
             bedrooms: 0,
             image: '',
-            availableSlots: [] // Starts empty
+            availableSlots: [],
         },
-        resolver: yupResolver(propertySchema)
-
+        resolver: yupResolver(propertySchema),
     });
-    // console.log(errors);
 
     const handleErr = (formErr) => {
-        const firstErr = Object.values(formErr)[0].message
-        toast.error(firstErr)
-    }
+        const firstErr = Object.values(formErr)[0]?.message;
+        if (firstErr) toast.error(firstErr);
+    };
 
-
-    // Handle the array of date objects
     const { fields, append, remove } = useFieldArray({
         control,
-        name: "availableSlots"
+        name: "availableSlots",
     });
 
-    // const onSubmit = async (data) => {
-    //     const finalData = { ...data, agent: userInfo?._id };
-    // };
+    // eslint-disable-next-line react-hooks/incompatible-library
+    const selectedImageName = watch("image")?.[0]?.name;
 
     return (
-        <div>
+        <div className="min-h-screen bg-[#F9F8F6] text-[#1A1A1A] pb-20">
             <PropVistaHeader showPostButton={false} showSearch={false} />
-            <div className="max-w-6xl mx-auto p-4 md:p-2" style={{ fontFamily: "'Syne', sans-serif" }}>
-                <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
 
-                    <div className="bg-slate-600 p-8 text-white">
-                        <h2 className="text-2xl font-black uppercase tracking-tight">List New Property</h2>
-                        <p className="text-slate-400 text-xs uppercase tracking-widest mt-2">Fill in the details to reach potential clients</p>
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-6">
+                <div className="flex items-center justify-between">
+                    <Link
+                        to="/dashboard"
+                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-[8px] bg-white border border-[#E4E2DC] hover:border-[#1E3A34] text-xs font-semibold text-[#1A1A1A] transition-colors"
+                    >
+                        <ChevronLeft size={15} />
+                        <span>Back to Portfolio</span>
+                    </Link>
+                </div>
+
+                <div className="bg-white rounded-[12px] border border-[#E4E2DC] shadow-xs overflow-hidden">
+                    <div className="bg-[#161817] px-6 sm:px-10 py-8 text-white space-y-2">
+                        <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#C86D51] text-[10px] font-semibold uppercase tracking-wider">
+                            New Residence Listing
+                        </span>
+                        <h1 className="font-serif-editorial text-2xl sm:text-3xl font-normal">
+                            Publish a Residence
+                        </h1>
+                        <p className="text-xs sm:text-sm text-[#8F8E88]">
+                            Provide architectural specifications, photography, and private viewing availability.
+                        </p>
                     </div>
 
-                    <form onSubmit={handleSubmit(postProperty, handleErr)} className="p-6 md:p-10 space-y-6">
-
-                        {/* Basic Info Group */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="flex flex-col gap-2">
-                                <label className="text-[11px] font-bold uppercase text-slate-500 ml-1">Property Title</label>
+                    <form onSubmit={handleSubmit(postProperty, handleErr)} className="p-6 sm:p-10 space-y-8">
+                        {/* Title & Location */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div className="space-y-1.5">
+                                <label
+                                    htmlFor="post-title"
+                                    className="block text-xs font-semibold uppercase tracking-wider text-[#5C5C58]"
+                                >
+                                    Residence Title
+                                </label>
                                 <input
+                                    id="post-title"
                                     {...register("title", { required: true })}
-                                    placeholder="e.g. Modern 3-Bedroom Villa"
-                                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 transition-all"
+                                    placeholder="e.g. The Solis Contemporary Villa"
+                                    className="w-full h-11 rounded-[8px] border border-[#E4E2DC] bg-[#F9F8F6] px-3.5 text-sm text-[#1A1A1A] outline-none focus:border-[#1E3A34] focus:bg-white transition-colors"
                                 />
                             </div>
-                            <div className="flex flex-col gap-2">
-                                <label className="text-[11px] font-bold uppercase text-slate-500 ml-1">Location</label>
+                            <div className="space-y-1.5">
+                                <label
+                                    htmlFor="post-location"
+                                    className="block text-xs font-semibold uppercase tracking-wider text-[#5C5C58]"
+                                >
+                                    Location
+                                </label>
                                 <input
+                                    id="post-location"
                                     {...register("location")}
-                                    placeholder="City, State"
-                                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 transition-all"
+                                    placeholder="Neighborhood, City (e.g. Ikoyi, Lagos)"
+                                    className="w-full h-11 rounded-[8px] border border-[#E4E2DC] bg-[#F9F8F6] px-3.5 text-sm text-[#1A1A1A] outline-none focus:border-[#1E3A34] focus:bg-white transition-colors"
                                 />
                             </div>
                         </div>
 
-                        {/* Pricing, Type, Bedrooms */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="flex flex-col gap-2">
-                                <label className="text-[11px] font-bold uppercase text-slate-500 ml-1">Price ($)</label>
+                        {/* Price, Type, Bedrooms */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                            <div className="space-y-1.5">
+                                <label
+                                    htmlFor="post-price"
+                                    className="block text-xs font-semibold uppercase tracking-wider text-[#5C5C58]"
+                                >
+                                    Guide Price (₦)
+                                </label>
                                 <input
+                                    id="post-price"
                                     type="number"
                                     {...register("price", { required: true })}
-                                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 transition-all"
+                                    placeholder="e.g. 85000000"
+                                    className="w-full h-11 rounded-[8px] border border-[#E4E2DC] bg-[#F9F8F6] px-3.5 text-sm text-[#1A1A1A] outline-none focus:border-[#1E3A34] focus:bg-white transition-colors tabular-nums"
                                 />
                             </div>
-                            <div className="flex flex-col gap-2">
-                                <label className="text-[11px] font-bold uppercase text-slate-500 ml-1">Property Type</label>
+                            <div className="space-y-1.5">
+                                <label
+                                    htmlFor="post-type"
+                                    className="block text-xs font-semibold uppercase tracking-wider text-[#5C5C58]"
+                                >
+                                    Property Classification
+                                </label>
                                 <select
+                                    id="post-type"
                                     {...register("propertyType")}
-                                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 transition-all appearance-none"
+                                    className="w-full h-11 rounded-[8px] border border-[#E4E2DC] bg-[#F9F8F6] px-3.5 text-sm text-[#1A1A1A] outline-none focus:border-[#1E3A34] focus:bg-white transition-colors"
                                 >
                                     <option value="apartment">Apartment</option>
                                     <option value="duplex">Duplex</option>
@@ -125,107 +172,156 @@ const PostPropertyForm = () => {
                                     <option value="commercial">Commercial</option>
                                 </select>
                             </div>
-                            <div className="flex flex-col gap-2">
-                                <label className="text-[11px] font-bold uppercase text-slate-500 ml-1">Bedrooms</label>
+                            <div className="space-y-1.5">
+                                <label
+                                    htmlFor="post-bedrooms"
+                                    className="block text-xs font-semibold uppercase tracking-wider text-[#5C5C58]"
+                                >
+                                    Bedrooms
+                                </label>
                                 <input
+                                    id="post-bedrooms"
                                     type="number"
                                     {...register("bedrooms")}
-                                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 transition-all"
+                                    className="w-full h-11 rounded-[8px] border border-[#E4E2DC] bg-[#F9F8F6] px-3.5 text-sm text-[#1A1A1A] outline-none focus:border-[#1E3A34] focus:bg-white transition-colors tabular-nums"
                                 />
                             </div>
                         </div>
 
                         {/* Description */}
-                        <div className="flex flex-col gap-2">
-                            <label className="text-[11px] font-bold uppercase text-slate-500 ml-1">Description</label>
+                        <div className="space-y-1.5">
+                            <label
+                                htmlFor="post-description"
+                                className="block text-xs font-semibold uppercase tracking-wider text-[#5C5C58]"
+                            >
+                                Architectural Narrative & Description
+                            </label>
                             <textarea
+                                id="post-description"
                                 {...register("description", { required: true })}
                                 rows="4"
-                                placeholder="Describe the property..."
-                                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 transition-all"
+                                placeholder="Describe the spatial layout, natural light, materials, and neighborhood setting..."
+                                className="w-full rounded-[8px] border border-[#E4E2DC] bg-[#F9F8F6] p-3.5 text-sm text-[#1A1A1A] outline-none focus:border-[#1E3A34] focus:bg-white transition-colors"
                             />
                         </div>
-                        {/* Property Image */}
-                        <div className="flex flex-col gap-2">
-                            <label className="text-[11px] font-bold uppercase text-slate-500 ml-1">
-                                Property Image
+
+                        {/* Primary Photograph Upload */}
+                        <div className="space-y-1.5">
+                            <label className="block text-xs font-semibold uppercase tracking-wider text-[#5C5C58]">
+                                Primary Residence Photograph
                             </label>
-                            <div className={`relative flex items-center justify-center w-full border-2 border-dashed rounded-2xl p-4 transition-all ${errors.image ? "border-red-400 bg-red-50" : "border-slate-200 bg-slate-50 hover:border-emerald-400"
-                                }`}>
+                            <div
+                                className={`relative flex flex-col items-center justify-center w-full border border-dashed rounded-[12px] p-8 transition-colors ${
+                                    errors.image
+                                        ? "border-[#C86D51] bg-[#C86D51]/5"
+                                        : "border-[#8F8E88] bg-[#F9F8F6] hover:border-[#1E3A34]"
+                                }`}
+                            >
                                 <input
                                     type="file"
                                     accept="image/*"
                                     {...register("image")}
                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                 />
-                                <div className="text-center">
-                                    <i className={`fas fa-cloud-upload-alt mb-2 ${errors.image ? "text-red-400" : "text-slate-400"}`}></i>
-                                    <p className="text-xs text-slate-500 font-medium">
-                                        {watch("image")?.[0]?.name || "Click to upload or drag and drop"}
-                                    </p>
-                                </div>
+                                <UploadCloud size={26} className="text-[#1E3A34] mb-2" />
+                                <p className="text-xs font-semibold text-[#1A1A1A]">
+                                    {selectedImageName || "Click to select or drop high-resolution photography"}
+                                </p>
+                                <p className="text-[11px] text-[#8F8E88] mt-1">
+                                    Recommended 16:10 landscape orientation • JPG, PNG, WebP
+                                </p>
                             </div>
                         </div>
 
-                        {/* Availability Slots Section */}
-                        <div className="space-y-4">
-                            <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                                <label className="text-[11px] font-bold uppercase text-slate-500 ml-1">Viewing Availability</label>
+                        {/* Viewing Availability Slots */}
+                        <div className="space-y-4 pt-4 border-t border-[#E4E2DC]">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                                <div>
+                                    <label className="block text-xs font-semibold uppercase tracking-wider text-[#1A1A1A]">
+                                        Private Viewing Windows
+                                    </label>
+                                    <p className="text-xs text-[#5C5C58]">
+                                        Add available dates and time slots for prospective clients to book.
+                                    </p>
+                                </div>
                                 <button
                                     type="button"
                                     onClick={() => append({ date: '', times: [''] })}
-                                    className="text-[10px] bg-emerald-50 text-slate-600 px-3 py-1 rounded-full font-bold uppercase hover:bg-emerald-100 transition-colors"
+                                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[8px] bg-[#F1EFEA] border border-[#E4E2DC] hover:border-[#1E3A34] text-xs font-semibold text-[#1E3A34] transition-colors cursor-pointer"
                                 >
-                                    + Add Date
+                                    <Plus size={14} />
+                                    <span>Add Viewing Date</span>
                                 </button>
                             </div>
 
-                            <div className="grid grid-cols-1 gap-4">
-                                {fields.map((field, index) => (
-                                    <div key={field.id} className="bg-slate-50 p-4 rounded-2xl border border-slate-200 relative">
-                                        <button
-                                            type="button"
-                                            onClick={() => remove(index)}
-                                            className="absolute top-2 right-2 text-slate-400 hover:text-red-500 text-xs"
+                            {fields.length === 0 ? (
+                                <div className="p-6 rounded-[12px] bg-[#F1EFEA] border border-[#E4E2DC] text-center text-xs text-[#5C5C58]">
+                                    No viewing dates added yet. Click "Add Viewing Date" above to publish open tour windows.
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {fields.map((field, index) => (
+                                        <div
+                                            key={field.id}
+                                            className="bg-[#F9F8F6] p-4 sm:p-5 rounded-[12px] border border-[#E4E2DC] relative"
                                         >
-                                            <i className="fas fa-times"></i>
-                                        </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => remove(index)}
+                                                aria-label="Remove viewing date"
+                                                className="absolute top-3.5 right-3.5 text-[#8F8E88] hover:text-[#C86D51] transition-colors cursor-pointer"
+                                            >
+                                                <Trash2 size={15} />
+                                            </button>
 
-                                        <div className="flex flex-col md:flex-row gap-4">
-                                            <div className="flex-1">
-                                                <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Date</label>
-                                                <input
-                                                    type="date"
-                                                    {...register(`availableSlots.${index}.date`)}
-                                                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-400"
-                                                />
-                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start pr-6">
+                                                <div className="md:col-span-4">
+                                                    <label className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#5C5C58] uppercase tracking-wider mb-2">
+                                                        <Calendar size={12} className="text-[#1E3A34]" />
+                                                        <span>Date</span>
+                                                    </label>
+                                                    <input
+                                                        type="date"
+                                                        {...register(`availableSlots.${index}.date`)}
+                                                        className="w-full h-10 rounded-[8px] border border-[#E4E2DC] bg-white px-3 text-xs font-medium text-[#1A1A1A] outline-none focus:border-[#1E3A34]"
+                                                    />
+                                                </div>
 
-                                            {/* Nested Time Slots Array */}
-                                            <div className="flex-[2]">
-                                                <TimeSlotsInput
-                                                    nestIndex={index}
-                                                    control={control}
-                                                    register={register}
-                                                />
+                                                <div className="md:col-span-8">
+                                                    <TimeSlotsInput
+                                                        nestIndex={index}
+                                                        control={control}
+                                                        register={register}
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
-                        <div className="pt-4">
+                        {/* Submit Action */}
+                        <div className="pt-4 border-t border-[#E4E2DC] flex items-center justify-end gap-3">
+                            <Link
+                                to="/dashboard"
+                                className="px-5 py-3 rounded-[8px] border border-[#E4E2DC] bg-white text-xs font-semibold text-[#5C5C58] hover:text-[#1A1A1A] transition-colors"
+                            >
+                                Cancel
+                            </Link>
                             <button
                                 type="submit"
-                                className={`w-full py-4 rounded-xl mt-4 flex items-center justify-center gap-2 text-white font-semibold transition-all 
-                            ${addingProperty ? "bg-gray-500 cursor-not-allowed" : "bg-slate-900 hover:bg-slate-700 cursor-pointer "}`}
                                 disabled={addingProperty}
+                                className={`px-7 py-3 rounded-[8px] flex items-center justify-center gap-2 text-white text-xs sm:text-sm font-semibold transition-colors ${
+                                    addingProperty
+                                        ? "bg-[#8F8E88] cursor-not-allowed"
+                                        : "bg-[#1E3A34] hover:bg-[#142824] cursor-pointer"
+                                }`}
                             >
                                 {addingProperty ? (
                                     <>
-                                        <span>Processing</span>
-                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        <span>Publishing Residence...</span>
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                                     </>
                                 ) : (
                                     "Publish Property"
@@ -239,4 +335,4 @@ const PostPropertyForm = () => {
     );
 };
 
-export default PostPropertyForm
+export default PostPropertyForm;

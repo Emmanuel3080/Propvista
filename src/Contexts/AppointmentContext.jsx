@@ -1,9 +1,9 @@
 import { createContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const appointmentContext = createContext()
 
 
@@ -16,7 +16,6 @@ const AppointmentProvider = ({ children }) => {
     // }
     const baseUrl = import.meta.env.VITE_API_URL
 
-    const navigate = useNavigate()
     const [appointmentdata, showAppointment] = useState([])
     const [loadAppointment, setLoadingAppointment] = useState(false)
     const [loadBooking, setBooking] = useState(false)
@@ -27,14 +26,14 @@ const AppointmentProvider = ({ children }) => {
 
 
     const BookAppointment = async (propertyId, agentId, selectedSlot, message) => {
-        setBooking(true)
-        const token = localStorage.getItem("AccessToken");
-
         // Ensure we have a selection before sending
-        if (!selectedSlot.date || !selectedSlot.time) {
-            console.error("No date or time selected");
+        if (!selectedSlot?.date || !selectedSlot?.time) {
+            toast.error("Please select an available date and time slot");
             return;
         }
+
+        setBooking(true)
+        const token = localStorage.getItem("AccessToken");
 
         try {
             const response = await fetch(`${baseUrl}/users/appointment_book`, {

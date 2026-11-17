@@ -4,9 +4,20 @@ import { toast } from "sonner";
 
 
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const propertyContext = createContext()
 
 
+
+const DEFAULT_FILTERS = {
+    locationQuery: "",
+    propertyType: "all",
+    priceRange: "all", // 'all' | 'under-5m' | '5m-25m' | '25m-100m' | 'above-100m'
+    minBedrooms: "any",
+    category: "all", // 'all' | 'architectural' | 'waterfront' | 'penthouse' | 'garden-villa' | 'new-build'
+    savedOnly: false,
+    sortBy: "newest"
+};
 
 const PropertyProvider = ({ children }) => {
 
@@ -18,6 +29,34 @@ const PropertyProvider = ({ children }) => {
     const [singleProp, setSingleProp] = useState({})
     const [deleteProp, setDelete] = useState(false)
     const [updateProp, setUpdateProp] = useState(false)
+    const [searchFilters, setSearchFilters] = useState(DEFAULT_FILTERS)
+    const [savedIds, setSavedIds] = useState(() => {
+        try {
+            const raw = localStorage.getItem("PropvistaSavedProperties")
+            return raw ? JSON.parse(raw) : []
+        } catch {
+            return []
+        }
+    })
+
+    const toggleSavedProperty = (id) => {
+        if (!id) return
+        setSavedIds((prev) => {
+            const exists = prev.includes(id)
+            const next = exists ? prev.filter((item) => item !== id) : [...prev, id]
+            try {
+                localStorage.setItem("PropvistaSavedProperties", JSON.stringify(next))
+            } catch (e) {
+                console.log(e)
+            }
+            toast.success(exists ? "Removed from Saved Properties" : "Saved to your collection")
+            return next
+        })
+    }
+
+    const isPropertySaved = (id) => Boolean(id && savedIds.includes(id))
+
+    const resetSearchFilters = () => setSearchFilters(DEFAULT_FILTERS)
 
 
     const navigate = useNavigate()
@@ -104,12 +143,12 @@ const PropertyProvider = ({ children }) => {
                 body: payload
             })
             const data = await response.json()
-            if (response.json) {
+            if (response.ok) {
                 toast.success(data.Message)
                 navigate("/dashboard")
             }
             else {
-                toast.error(data.Message)
+                toast.error(data.Message || "Failed to post property")
             }
         } catch (error) {
             console.log(error);
@@ -122,11 +161,12 @@ const PropertyProvider = ({ children }) => {
 
 
     const singleProperty = async (id) => {
+        const token = localStorage.getItem("AccessToken") || localStorage.getItem("AgentAccessToken")
         try {
             const response = await fetch(`${baseUrl}/users/property/single/${id}`, {
                 headers: {
                     "Content-Type": "application/json",
-                    authorization: `Bearer ${localStorage.getItem("AccessToken")}`
+                    authorization: `Bearer ${token}`
                 }
             })
 
@@ -135,7 +175,12 @@ const PropertyProvider = ({ children }) => {
                 console.log(data);
                 setSingleProp(data.property)
             } else {
-                toast.error("Unable to fetch Property")
+                const cached = agentProp?.find((item) => item._id === id)
+                if (cached) {
+                    setSingleProp(cached)
+                } else {
+                    toast.error("Unable to fetch Property")
+                }
             }
 
         } catch (error) {
@@ -234,7 +279,13 @@ const PropertyProvider = ({ children }) => {
         loadProperty,
         agentProp,
         showAgentProperty,
-        singleProp
+        singleProp,
+        savedIds,
+        toggleSavedProperty,
+        isPropertySaved,
+        searchFilters,
+        setSearchFilters,
+        resetSearchFilters
     }
     return (
         <>

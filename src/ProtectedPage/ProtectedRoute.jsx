@@ -4,7 +4,7 @@ import { Outlet, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 
 const ProtectedRoute = () => {
-    const { userInfo, checkAuthState } = useContext(authContext)
+    const { checkAuthState } = useContext(authContext)
 
     const navigate = useNavigate()
 
@@ -22,6 +22,7 @@ const ProtectedRoute = () => {
 
     useEffect(() => {
         isAuthenticated()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     return (

@@ -1,38 +1,44 @@
 import React from 'react';
 import { useFieldArray } from 'react-hook-form';
+import { Plus, X, Clock } from 'lucide-react';
 
 const TimeSlotsInput = ({ nestIndex, control, register }) => {
     const { fields, append, remove } = useFieldArray({
         control,
-        name: `availableSlots.${nestIndex}.times`
+        name: `availableSlots.${nestIndex}.times`,
     });
 
     return (
         <div>
-            <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Available Times</label>
-            <div className="flex flex-wrap gap-2">
+            <label className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#5C5C58] mb-2">
+                <Clock size={12} className="text-[#1E3A34]" />
+                <span>Available Viewing Times</span>
+            </label>
+            <div className="flex flex-wrap items-center gap-2.5">
                 {fields.map((field, k) => (
-                    <div key={field.id} className="relative group">
+                    <div key={field.id} className="relative group flex items-center">
                         <input
                             type="time"
                             {...register(`availableSlots.${nestIndex}.times.${k}`)}
-                            className="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-400 bg-white"
+                            className="h-10 rounded-[8px] border border-[#E4E2DC] bg-white px-3 pr-8 text-xs font-medium text-[#1A1A1A] outline-none focus:border-[#1E3A34] tabular-nums"
                         />
-                        <button 
-                            type="button" 
+                        <button
+                            type="button"
                             onClick={() => remove(k)}
-                            className="absolute -top-1 -right-1 bg-white text-red-500 border border-slate-200 rounded-full w-4 h-4 flex items-center justify-center text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"
+                            aria-label="Remove time slot"
+                            className="absolute right-2 text-[#8F8E88] hover:text-[#C86D51] transition-colors cursor-pointer"
                         >
-                            <i className="fas fa-times"></i>
+                            <X size={13} />
                         </button>
                     </div>
                 ))}
-                <button 
+                <button
                     type="button"
                     onClick={() => append("")}
-                    className="w-10 h-10 rounded-xl border-2 border-dashed border-slate-300 text-slate-400 hover:border-emerald-400 hover:text-emerald-500 transition-all"
+                    className="h-10 px-3 rounded-[8px] border border-dashed border-[#8F8E88] text-xs font-semibold text-[#5C5C58] hover:border-[#1E3A34] hover:text-[#1E3A34] inline-flex items-center gap-1 transition-colors cursor-pointer bg-white"
                 >
-                    +
+                    <Plus size={13} />
+                    <span>Add Time</span>
                 </button>
             </div>
         </div>

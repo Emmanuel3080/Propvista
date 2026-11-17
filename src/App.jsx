@@ -1,17 +1,14 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
 import './App.css'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
+import { AnimatePresence, MotionConfig } from 'framer-motion'
 import SignupPage from './AuthPages/SignupPage'
 import SignInPage from './AuthPages/SignInPage'
 import UserDashboard from './Dashboard/UserDashboard'
 import AuthProvider from './Contexts/UserAuthContext'
 import { Toaster } from 'sonner'
 import ProtectedRoute from './ProtectedPage/ProtectedRoute'
-import AgentSignUp from './AgentAuthPage/Signup'
-import AgentSignin from './AgentAuthPage/SignIn.'
+import AgentSignUp from './AgentAuthPage/SignUp'
+import AgentSignin from './AgentAuthPage/SignIn'
 import AgentAuthProvider from './Contexts/AgentAuthContext'
 import AgentDashboard from './Dashboard/AgentDashboard'
 import AgentProtected from './ProtectedPage/AgentProtected'
@@ -22,15 +19,47 @@ import AllPropperties from './Pages/AllPropperties'
 import AppointmentProvider from './Contexts/AppointmentContext'
 import UpdateProperty from './Components/UpdateProperty'
 import AboutUs from './Pages/AboutUs'
+import ScrollToTop from './Common/ScrollToTop'
+import PageTransition from './Common/PageTransition'
 
-
-function App() {
-  const [count, setCount] = useState(0)
+function AnimatedRoutes() {
+  const location = useLocation()
 
   return (
-    <>
+    <AnimatePresence mode="wait" initial={false}>
+      <Routes location={location} key={location.pathname}>
+        <Route path='/signup' element={<PageTransition><SignupPage /></PageTransition>} />
+        <Route path='/signin' element={<PageTransition><SignInPage /></PageTransition>} />
 
+        {/* User Protected Route */}
+        <Route element={<ProtectedRoute />}>
+          <Route path='/' element={<PageTransition><UserDashboard /></PageTransition>} />
+          <Route path='/single/:id' element={<PageTransition><SinglePropertyPage /></PageTransition>} />
+          <Route path='/properties' element={<PageTransition><AllPropperties /></PageTransition>} />
+          <Route path='/saved' element={<PageTransition><AllPropperties savedOnlyDefault={true} /></PageTransition>} />
+          <Route path='/about' element={<PageTransition><AboutUs /></PageTransition>} />
+        </Route>
+
+        {/* Agent Routes */}
+        <Route path='/agent/signup' element={<PageTransition><AgentSignUp /></PageTransition>} />
+        <Route path='/agent/signin' element={<PageTransition><AgentSignin /></PageTransition>} />
+
+        {/* Agent Protected Routes */}
+        <Route element={<AgentProtected />}>
+          <Route path='/dashboard' element={<AgentDashboard />} />
+          <Route path="/post-job" element={<PostProperty />} />
+          <Route path='property/update/:propertyId' element={<UpdateProperty />} />
+        </Route>
+      </Routes>
+    </AnimatePresence>
+  )
+}
+
+function App() {
+  return (
+    <MotionConfig reducedMotion="user">
       <BrowserRouter>
+        <ScrollToTop />
         <AgentAuthProvider>
           <AuthProvider>
             <PropertyProvider>
@@ -40,66 +69,26 @@ function App() {
                   closeButton
                   toastOptions={{
                     style: {
-                      background: "rgba(255, 255, 255, 0.8)", // Slight transparency
-                      backdropFilter: "blur(12px)",           // Glass effect
-                      WebkitBackdropFilter: "blur(12px)",     // Safari support
-                      border: "1px solid rgba(255, 255, 255, 0.3)",
-                      borderRadius: "14px",                   // Matches modern UI curves
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      padding: "16px",
-                      color: "#0f172a",                       // Slate-900 for readability
-                      fontFamily: "inherit",                  // Respects your app's font-family
-                      boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)",
+                      background: "#FFFFFF",
+                      border: "1px solid #E4E2DC",
+                      borderRadius: "12px",
+                      fontSize: "0.875rem",
+                      fontWeight: "500",
+                      padding: "14px 16px",
+                      color: "#1A1A1A",
+                      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+                      boxShadow: "0 12px 32px -8px rgba(26, 26, 26, 0.08)",
                     },
-                    className: "my-toast-class", // Optional for Tailwind overrides
+                    className: "my-toast-class",
                   }}
                 />
-                <Routes>
-                  <Route path='/signup' element={<SignupPage />} />
-                  <Route path='/signin' element={<SignInPage />} />
-
-
-                  {/* User Protected Route */}
-                  <Route element={<ProtectedRoute />}>
-                    <Route path='/' element={<UserDashboard />} />
-                    <Route path='/single/:id' element={<SinglePropertyPage />} />
-                    <Route path='/properties' element={<AllPropperties />} />
-                    <Route path='/about' element={<AboutUs />} />
-                  </Route>
-
-
-                  {/* Agent Routes */}
-                  <Route path='/agent/signup' element={<AgentSignUp />} />
-                  <Route path='/agent/signin' element={<AgentSignin />} />
-
-
-                  {/* Agent Protected Routes */}
-                  <Route element={<AgentProtected />}>
-                    <Route path='/dashboard' element={<AgentDashboard />} />
-                    <Route path="/post-job" element={<PostProperty />}
-                    />
-                    <Route path='property/update/:propertyId' element={<UpdateProperty />} />
-                  </Route>
-
-
-                </Routes>
-
+                <AnimatedRoutes />
               </AppointmentProvider>
-
             </PropertyProvider>
-
-
-
-
           </AuthProvider>
-
         </AgentAuthProvider>
-
       </BrowserRouter>
-
-
-    </>
+    </MotionConfig>
   )
 }
 

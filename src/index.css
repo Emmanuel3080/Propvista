@@ -1,1 +1,250 @@
 @import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-primary: #F9F8F6;
+    --bg-secondary: #F1EFEA;
+    --bg-surface: #FFFFFF;
+    --bg-dark: #161817;
+    --text-primary: #1A1A1A;
+    --text-secondary: #5C5C58;
+    --text-muted: #8F8E88;
+    --accent-primary: #1E3A34;
+    --accent-hover: #142824;
+    --badge-featured: #C86D51;
+    --status-available: #2E7D32;
+    --border-warm: #E4E2DC;
+
+    --font-serif: 'Fraunces', Georgia, Cambria, 'Times New Roman', Times, serif;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  html {
+    font-family: var(--font-sans);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.9375rem; /* 15px mobile */
+    font-weight: 400;
+    line-height: 1.65;
+    letter-spacing: 0em;
+    text-align: start;
+    overflow-wrap: break-word;
+  }
+
+  @media (min-width: 768px) {
+    body {
+      font-size: 1rem; /* 16px desktop */
+    }
+  }
+
+  /* Enforce Inter on all interactive UI controls, navigation, labels, and tables */
+  input,
+  select,
+  textarea,
+  button,
+  label,
+  nav,
+  table,
+  th,
+  td {
+    font-family: var(--font-sans);
+  }
+
+  /* Enforce Fraunces with subtle negative letter-spacing and 400–600 weights on headings */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  p,
+  blockquote,
+  li {
+    text-wrap: pretty;
+  }
+}
+
+/* ── Font Family Utilities ── */
+.font-serif-editorial {
+  font-family: var(--font-serif);
+  letter-spacing: -0.02em;
+}
+
+.font-sans-ui {
+  font-family: var(--font-sans);
+}
+
+.tabular-nums {
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 2. Typography Hierarchy & Scale ── */
+
+/* Hero Headline (56px desktop / 36px mobile): Fraunces, weight 500, line-height 1.12, letter-spacing -0.025em */
+.type-hero {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 2.25rem; /* 36px */
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+@media (min-width: 768px) {
+  .type-hero {
+    font-size: 3.5rem; /* 56px */
+  }
+}
+
+.type-hero-italic {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-style: italic;
+}
+
+/* Property Detail Title (36px desktop / 28px mobile): Fraunces, weight 500, line-height 1.20, letter-spacing -0.02em */
+.type-property-title {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 1.75rem; /* 28px */
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+@media (min-width: 768px) {
+  .type-property-title {
+    font-size: 2.25rem; /* 36px */
+  }
+}
+
+/* Section Headings (26px desktop / 22px mobile): Fraunces, weight 500, line-height 1.25, letter-spacing -0.02em */
+.type-section-heading {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 1.375rem; /* 22px */
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+@media (min-width: 768px) {
+  .type-section-heading {
+    font-size: 1.625rem; /* 26px */
+  }
+}
+
+/* Card Prices (20px desktop / 18px mobile): Inter, weight 600, line-height 1.25, letter-spacing -0.01em, tabular numerals */
+.type-card-price {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 1.125rem; /* 18px */
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 768px) {
+  .type-card-price {
+    font-size: 1.25rem; /* 20px */
+  }
+}
+
+/* Card Property Titles (17px desktop / 16px mobile): Fraunces, weight 500, line-height 1.35, letter-spacing -0.015em */
+.type-card-title {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 1rem; /* 16px */
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+}
+
+@media (min-width: 768px) {
+  .type-card-title {
+    font-size: 1.0625rem; /* 17px */
+  }
+}
+
+/* Card Metadata & Addresses (14px desktop / 13px mobile): Inter, weight 500, line-height 1.40 */
+.type-card-meta {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 0.8125rem; /* 13px */
+  line-height: 1.4;
+  letter-spacing: 0em;
+}
+
+@media (min-width: 768px) {
+  .type-card-meta {
+    font-size: 0.875rem; /* 14px */
+  }
+}
+
+/* Body Copy (16px desktop / 15px mobile): Inter, weight 400, line-height 1.65, letter-spacing 0em */
+.type-body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 0.9375rem; /* 15px */
+  line-height: 1.65;
+  letter-spacing: 0em;
+  text-wrap: pretty;
+}
+
+@media (min-width: 768px) {
+  .type-body {
+    font-size: 1rem; /* 16px */
+  }
+}
+
+/* Specs, Filter Pills & Micro-Badges (12px desktop / 11px mobile): Inter, weight 600, uppercase, line-height 1.00, letter-spacing +0.06em */
+.type-micro-badge {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.6875rem; /* 11px */
+  text-transform: uppercase;
+  line-height: 1;
+  letter-spacing: 0.06em;
+}
+
+@media (min-width: 768px) {
+  .type-micro-badge {
+    font-size: 0.75rem; /* 12px */
+  }
+}
+
+/* Responsive accessible data table with sticky headers */
+.pv-table-region {
+  overflow: auto;
+  max-inline-size: 100%;
+  max-block-size: min(640px, 80vh);
+  container-type: inline-size;
+}
+
+.pv-table-region table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.pv-table-region thead {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+}
+
+.pv-table-region tbody th {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  background-color: #FFFFFF;
+}

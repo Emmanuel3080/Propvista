@@ -1,8 +1,9 @@
 import { createContext, useState } from "react"
-import { Form, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const agentAuthContext = createContext()
 
 const AgentAuthProvider = ({ children }) => {
@@ -126,10 +127,18 @@ const AgentAuthProvider = ({ children }) => {
 
 
 
+    const logout = () => {
+        localStorage.removeItem("AgentAccessToken")
+        setuserInfo({})
+        toast.success("Logged out successfully")
+        navigate("/agent/signin")
+    }
+
     const authValue = {
         SignUp,
         handleSignIn,
         isAuthenticated,
+        logout,
         userInfo,
         loading,
         loadingLogin

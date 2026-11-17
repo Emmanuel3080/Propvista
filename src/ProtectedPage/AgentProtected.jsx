@@ -4,7 +4,7 @@ import { agentAuthContext } from '../Contexts/AgentAuthContext'
 import { toast } from 'sonner'
 
 const AgentProtected = () => {
-  const { isAuthenticated, userInfo, } = useContext(agentAuthContext)
+  const { isAuthenticated } = useContext(agentAuthContext)
 
 
   const navigate = useNavigate()
@@ -25,6 +25,7 @@ const AgentProtected = () => {
 
   useEffect(() => {
     isAuth()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   return (
     <div>

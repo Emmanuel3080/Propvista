@@ -1,100 +1,193 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { Heart, MapPin, BedDouble, Calendar, Building2, ArrowUpRight } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { propertyContext } from '../Contexts/PropertyContext';
+import { cardScrollVariants, LUXURY_EASE } from '../utils/motion';
 
-const PropertyCard = ({ title, location, price, bedrooms, description, image, propertyType, id }) => {
+const MODULE_LOAD_TIME = Date.now();
+
+const PropertyCard = ({
+    title,
+    location,
+    price,
+    bedrooms,
+    description,
+    image,
+    propertyType,
+    id,
+    agent,
+    availableSlots,
+    createdAt,
+}) => {
+    const { toggleSavedProperty, isPropertySaved } = useContext(propertyContext);
+
     if (!title) return null;
 
+    const saved = isPropertySaved ? isPropertySaved(id) : false;
+    const slotCount = Array.isArray(availableSlots)
+        ? availableSlots.reduce((acc, s) => acc + (s?.times?.length || 0), 0)
+        : 0;
+
+    const isRecent = createdAt
+        ? (MODULE_LOAD_TIME - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24) <= 14
+        : false;
+
+    const handleFavoriteClick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleSavedProperty?.(id);
+    };
+
     return (
+        <motion.article
+            variants={cardScrollVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.14 }}
+            whileHover={{ y: -5, transition: { duration: 0.28, ease: LUXURY_EASE } }}
+            className="group h-full bg-white rounded-[12px] border border-[#E4E2DC] overflow-hidden transition-shadow duration-300 hover:shadow-[0_20px_40px_-15px_rgba(26,26,26,0.12)] flex flex-col"
+        >
+            {/* 16:10 Architectural Image Container */}
+            <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#F1EFEA]">
+                {image ? (
+                    <motion.img
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.55, ease: LUXURY_EASE }}
+                        className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                        src={image}
+                        alt={title}
+                        loading="lazy"
+                    />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center text-[#8F8E88] text-xs">
+                        No photograph provided
+                    </div>
+                )}
 
-        <div className="group relative w-full max-w-[360px] bg-white rounded-[2.5rem] p-4 transition-all duration-500 hover:shadow-[0_40px_80px_-20px_rgba(79,70,229,0.2)] cursor-pointer">
+                <div className="absolute inset-0 bg-gradient-to-t from-[#161817]/40 via-transparent to-transparent opacity-60 pointer-events-none" />
 
-            {/* Image Container with Floating Badge */}
-            <div className="relative h-64 w-full overflow-hidden rounded-[2rem] bg-gray-100">
-                <img
-                    className="w-full h-full object-cover transition-transform duration-1000 ease-in-out group-hover:scale-110"
-                    src={image}
-                    alt={title}
-                />
+                {/* Top Left Badges */}
+                <div className="absolute top-3.5 left-3.5 flex flex-wrap items-center gap-1.5">
+                    <span className="px-3 py-1.5 rounded-full bg-[#161817]/80 backdrop-blur-md text-white type-micro-badge">
+                        {propertyType || "Residence"}
+                    </span>
 
-                {/* Modern Status Badge */}
-                <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full shadow-xl">
-                    {/* <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> */}
-                    <span className="text-[10px] font-bold text-white uppercase tracking-wider">{propertyType}</span>
+                    {isRecent ? (
+                        <span className="px-2.5 py-1.5 rounded-full bg-[#C86D51] text-white type-micro-badge">
+                            New Release
+                        </span>
+                    ) : (
+                        <span className="px-2.5 py-1.5 rounded-full bg-[#C86D51] text-white type-micro-badge">
+                            Featured
+                        </span>
+                    )}
                 </div>
 
-                {/* Overlapping Price Tag - Physical Depth */}
-                <div className="absolute bottom-5 right-0 translate-y-1/2 bg-indigo-400 px-2 py-1.5 rounded-2xl shadow-[0_10px_25px_-5px_rgba(79,70,229,0.5)] z-10 transition-transform group-hover:scale-105">
-                    <p className="text-white font-semibold font-black text-base tracking-tighter">
-                        ₦{Number(price).toLocaleString()}
-                    </p>
-                </div>
+                {/* Top Right Animated Favorite Button */}
+                <motion.button
+                    type="button"
+                    onClick={handleFavoriteClick}
+                    whileHover={{ scale: 1.08 }}
+                    whileTap={{ scale: 0.85 }}
+                    transition={{ duration: 0.2, ease: LUXURY_EASE }}
+                    aria-label={saved ? "Remove from saved properties" : "Save property"}
+                    aria-pressed={saved}
+                    className={`absolute top-3.5 right-3.5 w-9 h-9 rounded-full flex items-center justify-center transition-colors cursor-pointer border ${
+                        saved
+                            ? "bg-white text-[#C86D51] border-white shadow-sm"
+                            : "bg-white/90 hover:bg-white text-[#1A1A1A] border-white/60"
+                    }`}
+                >
+                    <AnimatePresence mode="wait" initial={false}>
+                        <motion.span
+                            key={saved ? "saved" : "unsaved"}
+                            initial={{ scale: 0.65, opacity: 0.5 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.65, opacity: 0 }}
+                            transition={{ duration: 0.2, ease: LUXURY_EASE }}
+                            className="inline-flex items-center justify-center"
+                        >
+                            <Heart
+                                size={16}
+                                className={saved ? "fill-[#C86D51] text-[#C86D51]" : "text-[#1A1A1A]"}
+                            />
+                        </motion.span>
+                    </AnimatePresence>
+                </motion.button>
+
+                {/* Bottom Left Availability Indicator */}
+                {slotCount > 0 && (
+                    <div className="absolute bottom-3 left-3.5 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/95 backdrop-blur-xs type-micro-badge text-[#2E7D32] shadow-xs tabular-nums">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#2E7D32]" />
+                        <span>{slotCount} Viewing {slotCount === 1 ? "Slot" : "Slots"}</span>
+                    </div>
+                )}
             </div>
 
-            {/* Content Area */}
-            <div className="px-2 pt-8 pb-2">
-
-                {/* Meta Row: Location & Stats */}
-                <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-1.5 text-indigo-500/80">
-                        <i className="fa-solid fa-location-dot text-[10px]"></i>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{location}</span>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-1">
-                            <i className="fa-solid fa-bed text-gray-400 text-[11px]"></i>
-                            <span className="text-xs font-bold text-gray-700">{bedrooms}</span>
-                        </div>
-                        {/* Adding a subtle divider */}
-                        <div className="h-3 w-[1px] bg-gray-200" />
-                        <div className="flex items-center gap-1">
-                            <i className="fa-solid fa-shield-check text-indigo-400 text-[11px]"></i>
-                            <span className="text-[10px] font-bold text-gray-500 uppercase">Verified</span>
+            {/* Card Content */}
+            <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-4">
+                <div className="space-y-2">
+                    {/* Price & Location Row */}
+                    <div className="flex items-baseline justify-between gap-2">
+                        <p className="type-card-price text-[#1A1A1A] tabular-nums">
+                            ₦{Number(price || 0).toLocaleString()}
+                        </p>
+                        <div className="flex items-center gap-1 type-card-meta text-[#5C5C58] truncate max-w-[55%]">
+                            <MapPin size={13} className="text-[#8F8E88] shrink-0" />
+                            <span className="truncate">{location || "Location pending"}</span>
                         </div>
                     </div>
+
+                    {/* Card Property Title */}
+                    <h3 className="type-card-title text-[#1A1A1A] group-hover:text-[#1E3A34] transition-colors line-clamp-1">
+                        {title}
+                    </h3>
+
+                    {/* Description */}
+                    {description && (
+                        <p className="type-body text-[#5C5C58] line-clamp-2">
+                            {description}
+                        </p>
+                    )}
                 </div>
 
-                {/* Main Title */}
-                <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight leading-tight mb-3 group-hover:text-indigo-600 transition-colors duration-300">
-                    {title}
-                </h2>
-
-                {/* Description with Inset Style */}
-                <div className="relative border-l-2 border-indigo-50 pl-4 py-1">
-                    <p className="text-[13px] text-gray-500 leading-relaxed line-clamp-2 italic">
-                        {description}
-                    </p>
-                </div>
-
-                <div className="mt-6 flex items-center justify-between">
-                    {/* <div className="flex -space-x-2">
-                         Visual "Social Proof" elements are very modern right now
-                        {[1, 2, 3].map((i) => (
-                            <div key={i} className="h-7 w-7 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center overflow-hidden">
-                                <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="viewer" />
-                            </div>
-                        ))}
-                        <div className="h-7 w-7 rounded-full border-2 border-white bg-gray-900 flex items-center justify-center text-[8px] font-bold text-white">
-                            +12
-                        </div>
-                    </div> */}
-
-                    <button className="flex items-center gap-2 group/btn">
-                        <a href={`/single/${id}`} className="text-[11px] font-black uppercase tracking-widest text-gray-900 group-hover/btn:text-indigo-600 transition-colors">
-                        <div className='flex items-center gap-1 '>
-                          <h1>View Details</h1>
-
-                             <div className="h-6 w-6 rounded-full bg-gray-900 flex items-center justify-center text-white transition-all group-hover/btn:bg-indigo-600 group-hover/btn:translate-x-1">
-                            <i className="fa-solid fa-arrow-right-long text-[10px]"></i>
+                {/* Specifications & Footer */}
+                <div className="pt-4 border-t border-[#E4E2DC] space-y-3">
+                    <div className="flex items-center justify-between text-[#5C5C58]">
+                        <div className="flex items-center gap-4">
+                            <span className="inline-flex items-center gap-1.5 type-micro-badge text-[#1A1A1A] tabular-nums">
+                                <BedDouble size={14} className="text-[#8F8E88]" />
+                                {bedrooms ?? 0} {Number(bedrooms) === 1 ? "Bed" : "Beds"}
+                            </span>
+                            <span className="inline-flex items-center gap-1.5 type-micro-badge text-[#5C5C58]">
+                                <Building2 size={14} className="text-[#8F8E88]" />
+                                {propertyType || "Residence"}
+                            </span>
                         </div>
 
-                        </div>
-                        
-                        </a>
-                   
-                    </button>
+                        {Array.isArray(availableSlots) && availableSlots.length > 0 && (
+                            <span className="inline-flex items-center gap-1 type-micro-badge text-[#2E7D32] tabular-nums">
+                                <Calendar size={12} />
+                                {availableSlots.length} {availableSlots.length === 1 ? "Date" : "Dates"}
+                            </span>
+                        )}
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1">
+                        <span className="text-[11px] text-[#8F8E88] truncate max-w-[65%]">
+                            {agent?.agencyName || agent?.fullName
+                                ? `Listed by ${agent.agencyName || agent.fullName}`
+                                : "Verified Propvista Listing"}
+                        </span>
+
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#1E3A34] group-hover:translate-x-0.5 transition-transform duration-200">
+                            <span>View Residence</span>
+                            <ArrowUpRight size={14} />
+                        </span>
+                    </div>
                 </div>
             </div>
-        </div>
+        </motion.article>
     );
 };
 

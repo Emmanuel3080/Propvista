@@ -1,338 +1,570 @@
-import { useContext, useEffect, useState } from "react";
-import { Home, Calendar, BarChart3, Plus, User, MapPin, Trash2, Edit3, Bell, Clock } from "lucide-react";
+import { useContext, useEffect, useMemo, useState } from "react";
+import {
+    Home,
+    Calendar,
+    BarChart3,
+    User,
+    MapPin,
+    Trash2,
+    Edit3,
+    Clock,
+    LogOut,
+    Plus,
+    AlertTriangle,
+    BedDouble,
+    CheckCircle2,
+    XCircle,
+} from "lucide-react";
 import { agentAuthContext } from "../Contexts/AgentAuthContext";
 import { propertyContext } from "../Contexts/PropertyContext";
 import { appointmentContext } from "../Contexts/AppointmentContext";
 import Modal from "react-modal";
-import ReactDom from "react-dom";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { Link, useNavigate } from "react-router-dom";
 
 Modal.setAppElement("#root");
 
-export default function AgentProperties() {
+export default function AgentProperties({ searchQuery = "" }) {
     const [modalOpen, setOpen] = useState(false);
     const [selectedPropertyId, setSelectedPropertyId] = useState(null);
 
-    const { userInfo } = useContext(agentAuthContext);
-    const { AgentAppointments, appointmentdata, loadAppointment, BookAppointment, loadBooking, approveAppoinment,
-        loadApproval, cancelAppointment, loadCancel } = useContext(appointmentContext);
-    const { agentProperty, agentProp, showAgentProperty, deleteProperty, deleteProp } = useContext(propertyContext);
+    const { userInfo, logout } = useContext(agentAuthContext);
+    const {
+        AgentAppointments,
+        appointmentdata,
+        loadAppointment,
+        approveAppoinment,
+        loadApproval,
+        cancelAppointment,
+        loadCancel,
+    } = useContext(appointmentContext);
+    const {
+        agentProperty,
+        agentProp,
+        showAgentProperty,
+        deleteProperty,
+        deleteProp,
+    } = useContext(propertyContext);
     const [activeTab, setActiveTab] = useState("properties");
 
-    let subtitle;
     const navigate = useNavigate();
 
-    function openModal() { setOpen(true); }
-    function afterOpenModal() { subtitle.style.color = "#f00"; }
-    function closeModal() { setOpen(false); }
+    function openModal() {
+        setOpen(true);
+    }
+    function closeModal() {
+        setOpen(false);
+    }
 
     useEffect(() => {
         if (userInfo?._id) agentProperty(userInfo._id);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userInfo]);
 
     useEffect(() => {
         if (userInfo?._id) AgentAppointments();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userInfo]);
 
+    const filteredAgentProperties = useMemo(() => {
+        if (!Array.isArray(agentProp)) return [];
+        const q = searchQuery.trim().toLowerCase();
+        if (!q) return agentProp;
+        return agentProp.filter((p) =>
+            `${p.title || ""} ${p.location || ""} ${p.propertyType || ""}`
+                .toLowerCase()
+                .includes(q)
+        );
+    }, [agentProp, searchQuery]);
+
     const navItems = [
-        { id: "properties", label: "Properties", icon: Home },
-        { id: "appointments", label: "Appointments", icon: Calendar },
+        { id: "properties", label: "Residences", icon: Home },
+        { id: "appointments", label: "Viewings", icon: Calendar },
         { id: "stats", label: "Analytics", icon: BarChart3 },
-        { id: "account", label: "Account", icon: User },
+        { id: "account", label: "Advisor Profile", icon: User },
     ];
 
+    const confirmedCount =
+        appointmentdata?.filter(
+            (a) => a.status === "confirmed" || a.status === "approved"
+        ).length ?? 0;
+    const pendingCount =
+        appointmentdata?.filter((a) => a.status === "pending").length ?? 0;
+
     return (
-        <div className="min-h-screen bg-slate-50 flex font-sans text-slate-900">
-
-            <aside className="w-52 bg-white border-r border-slate-200 hidden md:flex flex-col sticky top-0 h-screen">
-                <Modal
-                    isOpen={modalOpen}
-                    onAfterOpen={afterOpenModal}
-                    onRequestClose={closeModal}
-                    style={{
-                        overlay: {
-                            backgroundColor: "rgba(15, 23, 42, 0.75)",
-                            zIndex: 1000,
-                            backdropFilter: "blur(8px)",
-                        },
-                        content: {
-                            top: "50%", left: "50%", right: "auto", bottom: "auto",
-                            marginRight: "-50%", transform: "translate(-50%, -50%)",
-                            borderRadius: "24px", padding: "0", width: "90%",
-                            maxWidth: "500px", border: "none", backgroundColor: "#ffffff",
-                            boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)", overflow: "hidden",
-                        },
-                    }}
-                    contentLabel="Delete Confirmation Modal"
-                >
-                    <div className="p-8 text-center">
-                        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-50 mb-6">
-                            <svg className="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                        </div>
-                        <h2 className="text-2xl font-black text-slate-800 mb-2">Delete Property?</h2>
-                        <p className="text-slate-500 text-sm mb-8 leading-relaxed">
-                            Are you sure you want to delete this property? This action cannot be undone and the listing will be permanently removed.
+        <div className="min-h-[calc(100vh-5rem)] bg-[#F9F8F6] flex text-[#1A1A1A]">
+            {/* Delete Confirmation Modal */}
+            <Modal
+                isOpen={modalOpen}
+                onRequestClose={closeModal}
+                style={{
+                    overlay: {
+                        backgroundColor: "rgba(22, 24, 23, 0.72)",
+                        zIndex: 1000,
+                        backdropFilter: "blur(6px)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: "16px",
+                    },
+                    content: {
+                        position: "relative",
+                        inset: "auto",
+                        borderRadius: "12px",
+                        padding: "0",
+                        width: "100%",
+                        maxWidth: "460px",
+                        border: "1px solid #E4E2DC",
+                        backgroundColor: "#FFFFFF",
+                        boxShadow: "0 25px 50px -12px rgba(22,24,23,0.25)",
+                        overflow: "hidden",
+                    },
+                }}
+                contentLabel="Delete Property Confirmation Modal"
+            >
+                <div className="p-6 sm:p-8 text-center space-y-5">
+                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-[#C86D51]/15 text-[#C86D51]">
+                        <AlertTriangle size={22} />
+                    </div>
+                    <div className="space-y-2">
+                        <h2 className="font-serif-editorial text-2xl font-normal text-[#1A1A1A]">
+                            Remove Residence Listing?
+                        </h2>
+                        <p className="text-xs sm:text-sm text-[#5C5C58] leading-relaxed">
+                            Are you sure you want to permanently remove this property from your portfolio? This action cannot be undone.
                         </p>
-                        <div className="flex flex-col sm:flex-row gap-3">
-                            <button onClick={closeModal}
-                                className="flex-1 px-6 py-3.5 rounded-xl bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-colors">
-                                Cancel
-                            </button>
-                            <button disabled={deleteProp} onClick={() => deleteProperty(selectedPropertyId)}
-                                className="flex-1 flex items-center justify-center gap-3 px-6 py-5 rounded-xl bg-red-600 text-white font-bold text-sm hover:bg-red-700 shadow-lg shadow-red-200 transition-all active:scale-95 disabled:bg-red-400 disabled:cursor-not-allowed">
-                                {deleteProp ? (
-                                    <><span>Deleting Property</span><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div></>
-                                ) : "Delete Property"}
-                            </button>
-                        </div>
                     </div>
-                </Modal>
+                    <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                        <button
+                            type="button"
+                            onClick={closeModal}
+                            className="flex-1 px-5 py-2.5 rounded-[8px] bg-[#F1EFEA] border border-[#E4E2DC] text-[#1A1A1A] font-semibold text-xs hover:bg-[#E4E2DC] transition-colors cursor-pointer"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="button"
+                            disabled={deleteProp}
+                            onClick={() => deleteProperty(selectedPropertyId)}
+                            className="flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-[8px] bg-[#C86D51] hover:bg-[#b25b40] text-white font-semibold text-xs transition-colors disabled:opacity-60 cursor-pointer"
+                        >
+                            {deleteProp ? (
+                                <>
+                                    <span>Removing...</span>
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                </>
+                            ) : (
+                                "Delete Residence"
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
 
-                <div className="p-4">
-                    <div className="flex items-center gap-3 mb-10">
-                        <div className="bg-slate-400 p-2 rounded-lg">
-                            <Home className="text-white" size={30} />
-                        </div>
-                        <h1 className="text-2xl font-black tracking-tight text-slate-800">PropVista</h1>
+            {/* Desktop Sidebar */}
+            <aside className="w-60 bg-[#F1EFEA] border-r border-[#E4E2DC] hidden md:flex flex-col justify-between sticky top-20 h-[calc(100vh-5rem)] p-5">
+                <div className="space-y-6">
+                    <div className="px-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8F8E88]">
+                            Portfolio Suite
+                        </p>
                     </div>
-                    <nav className="space-y-2">
-                        {navItems.map((item) => (
-                            <button key={item.id} onClick={() => setActiveTab(item.id)}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${activeTab === item.id
-                                    ? "bg-indigo-50 text-indigo-700 shadow-sm"
-                                    : "text-slate-500 hover:bg-slate-100 hover:text-slate-700"
-                                    }`}>
-                                <item.icon size={20} className={activeTab === item.id ? "text-indigo-600" : "group-hover:text-slate-700"} />
-                                <span className="font-semibold">{item.label}</span>
-                            </button>
-                        ))}
+
+                    <nav className="space-y-1.5">
+                        {navItems.map((item) => {
+                            const active = activeTab === item.id;
+                            return (
+                                <button
+                                    key={item.id}
+                                    type="button"
+                                    onClick={() => setActiveTab(item.id)}
+                                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-[8px] text-xs font-semibold transition-all cursor-pointer ${
+                                        active
+                                            ? "bg-[#1E3A34] text-white"
+                                            : "text-[#5C5C58] hover:bg-white hover:text-[#1A1A1A]"
+                                    }`}
+                                >
+                                    <span className="flex items-center gap-3">
+                                        <item.icon size={16} />
+                                        <span>{item.label}</span>
+                                    </span>
+                                    {item.id === "appointments" && pendingCount > 0 && (
+                                        <span
+                                            className={`px-1.5 py-0.5 rounded-full text-[10px] tabular-nums ${
+                                                active
+                                                    ? "bg-[#C86D51] text-white"
+                                                    : "bg-[#C86D51]/15 text-[#C86D51]"
+                                            }`}
+                                        >
+                                            {pendingCount}
+                                        </span>
+                                    )}
+                                </button>
+                            );
+                        })}
                     </nav>
+                </div>
+
+                <div className="pt-4 border-t border-[#E4E2DC] space-y-3">
+                    <Link
+                        to="/post-job"
+                        className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-[8px] bg-[#1E3A34] hover:bg-[#142824] text-white text-xs font-semibold transition-colors"
+                    >
+                        <Plus size={14} />
+                        <span>New Listing</span>
+                    </Link>
+
+                    <button
+                        type="button"
+                        onClick={logout}
+                        className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-[8px] bg-white border border-[#E4E2DC] text-xs font-semibold text-[#5C5C58] hover:text-[#1A1A1A] transition-colors cursor-pointer"
+                    >
+                        <LogOut size={14} />
+                        <span>Sign Out</span>
+                    </button>
                 </div>
             </aside>
 
-            <main className="flex-1 p-4 md:p-5 overflow-y-auto pb-20 md:pb-5">
-
-                <div className="flex items-center gap-2 mb-6 md:hidden">
-                    <div className="bg-slate-400 p-1.5 rounded-lg">
-                        <Home className="text-white" size={20} />
-                    </div>
-                    <h1 className="text-xl font-black tracking-tight text-slate-800">PropVista</h1>
-                </div>
-
-                <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6 md:mb-10">
-                    <div>
-                        <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight capitalize">
-                            My {activeTab}
-                        </h2>
-                        <p className="text-slate-500 font-medium text-sm md:text-base">
-                            Welcome back, <span className="text-indigo-600 font-semibold">{userInfo?.fullName}</span>
+            {/* Main Content */}
+            <main className="flex-1 max-w-6xl mx-auto p-4 sm:p-6 lg:p-10 pb-24 md:pb-12 space-y-8">
+                {/* Section Header */}
+                <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 pb-6 border-b border-[#E4E2DC]">
+                    <div className="space-y-1">
+                        {/* <span className="type-micro-badge text-[#8F8E88]">
+                            Advisor Workspace
+                        </span> */}
+                        <h1 className="type-property-title text-[#1A1A1A] capitalize">
+                            {activeTab === "properties"
+                                ? "Published Residences"
+                                : activeTab === "appointments"
+                                ? "Client Viewing Requests"
+                                : activeTab === "stats"
+                                ? "Portfolio Analytics"
+                                : "Advisor Credentials"}
+                        </h1>
+                        <p className="type-body text-[#5C5C58]">
+                            Welcome back,{" "}
+                            <span className="text-[#1A1A1A] font-semibold">
+                                {userInfo?.fullName || "Partner Advisor"}
+                            </span>
                         </p>
                     </div>
-                    <div className="bg-white border border-slate-100 px-5 py-2.5 rounded-2xl shadow-sm flex flex-col items-end self-start sm:self-auto">
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Total Listings</p>
-                        <p className="text-2xl font-black text-slate-800">{agentProp?.length}</p>
+
+                    <div className="flex items-center gap-3 self-start sm:self-end">
+                        <div className="bg-white border border-[#E4E2DC] px-4 py-2.5 rounded-[12px] text-right">
+                            <p className="type-micro-badge text-[#8F8E88]">
+                                Active Listings
+                            </p>
+                            <p className="font-sans-ui text-xl font-semibold text-[#1A1A1A] tabular-nums mt-1">
+                                {agentProp?.length || 0}
+                            </p>
+                        </div>
+                        <div className="bg-white border border-[#E4E2DC] px-4 py-2.5 rounded-[12px] text-right">
+                            <p className="type-micro-badge text-[#8F8E88]">
+                                Pending Viewings
+                            </p>
+                            <p className="font-sans-ui text-xl font-semibold text-[#C86D51] tabular-nums mt-1">
+                                {pendingCount}
+                            </p>
+                        </div>
                     </div>
                 </header>
 
+                {/* ── Properties Tab ── */}
                 {activeTab === "properties" && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {showAgentProperty ? (
-                            <div className="col-span-full py-20 text-center text-slate-400 font-medium animate-pulse">
-                                Loading your properties...
-                            </div>
-                        ) : agentProp.length === 0 ? (
-                            <div className="col-span-full py-20 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-                                <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">No properties found</p>
-                                <button className="mt-4 text-indigo-600 font-bold text-sm hover:underline">
-                                    <a href="/post-job">List your first property</a>
-                                </button>
-                            </div>
-                        ) : (
-                            agentProp.map((p) => (
-                                <div key={p._id}
-                                    className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 flex flex-col">
-                                    <div className="h-48 md:h-56 overflow-hidden relative">
-                                        <img src={p.image} alt={p.title}
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                                        <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter text-slate-800 shadow-sm">
-                                            {p.propertyType || 'Property'}
-                                        </div>
-                                    </div>
-                                    <div className="p-4 md:p-5 flex flex-col flex-1">
-                                        <div className="mb-3">
-                                            <h3 className="font-bold text-base md:text-lg text-slate-800 mb-1 group-hover:text-indigo-600 transition-colors line-clamp-1">
-                                                {p.title}
-                                            </h3>
-                                            <div className="flex items-center gap-1 text-slate-400 text-xs">
-                                                <MapPin size={12} className="text-indigo-500" />
-                                                <span>{p.location}</span>
-                                            </div>
-                                        </div>
-                                        <p className="text-slate-500 text-xs line-clamp-2 mb-4 italic leading-relaxed">
-                                            "{p.description}"
-                                        </p>
-                                        <div className="mt-auto space-y-4">
-                                            <div className="flex justify-between items-end">
-                                                <div>
-                                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Price</p>
-                                                    <p className="text-lg md:text-xl font-black text-indigo-600">
-                                                        ₦{p.price?.toLocaleString()}
-                                                    </p>
-                                                </div>
-                                                <div className="text-right">
-                                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Next Viewing</p>
-                                                    <p className="text-xs font-bold text-slate-700">
-                                                        {p.availableSlots?.[0]?.date
-                                                            ? new Date(p.availableSlots[0].date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
-                                                            : 'No slots set'}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="flex gap-2 pt-4 border-t border-slate-50">
-                                                <button onClick={() => setActiveTab("appointments")}
-                                                    className="flex-1 flex justify-center items-center gap-1.5 py-2.5 bg-slate-50 hover:bg-violet-600 text-violet-700 hover:text-white rounded-xl font-bold transition-all duration-200">
-                                                    <Calendar size={14} />
-                                                    <span className="text-[10px] uppercase tracking-tight">Bookings</span>
-                                                </button>
-                                                <button className="flex-1 flex justify-center items-center gap-1.5 py-2.5 bg-slate-50 hover:bg-indigo-600 text-indigo-700 hover:text-white rounded-xl font-bold transition-all duration-200 cursor-pointer">
-                                                    <Edit3 size={14} />
-                                                    <a href={`property/update/${p._id}`} className="text-[10px] uppercase tracking-tight p-1">Edit</a>
-                                                </button>
-                                                <button className="px-3 py-2.5 bg-rose-50 hover:bg-rose-500 text-rose-500 hover:text-white rounded-xl transition-all duration-200"
-                                                    onClick={() => { setSelectedPropertyId(p._id); openModal(); }}>
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                        </div>
+                            [...Array(3)].map((_, i) => (
+                                <div
+                                    key={i}
+                                    className="bg-white rounded-[12px] border border-[#E4E2DC] overflow-hidden animate-pulse"
+                                >
+                                    <div className="aspect-[16/10] bg-[#F1EFEA]" />
+                                    <div className="p-5 space-y-3">
+                                        <div className="h-5 bg-[#F1EFEA] rounded w-2/3" />
+                                        <div className="h-4 bg-[#F1EFEA] rounded w-1/2" />
+                                        <div className="h-9 bg-[#F1EFEA] rounded w-full mt-4" />
                                     </div>
                                 </div>
+                            ))
+                        ) : filteredAgentProperties.length === 0 ? (
+                            <div className="col-span-full py-20 px-6 text-center bg-[#F1EFEA] rounded-[12px] border border-[#E4E2DC] space-y-4">
+                                <p className="font-serif-editorial text-2xl text-[#1A1A1A]">
+                                    {searchQuery
+                                        ? "No portfolio residences match your search"
+                                        : "No residences published yet"}
+                                </p>
+                                <p className="text-xs sm:text-sm text-[#5C5C58] max-w-md mx-auto">
+                                    Publish your first architectural listing with photography and available viewing windows.
+                                </p>
+                                <Link
+                                    to="/post-job"
+                                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[8px] bg-[#1E3A34] hover:bg-[#142824] text-white text-xs font-semibold transition-colors"
+                                >
+                                    <Plus size={14} />
+                                    <span>List Your First Residence</span>
+                                </Link>
+                            </div>
+                        ) : (
+                            filteredAgentProperties.map((p) => (
+                                <article
+                                    key={p._id}
+                                    className="group bg-white rounded-[12px] overflow-hidden border border-[#E4E2DC] hover:shadow-md transition-all flex flex-col"
+                                >
+                                    <div className="aspect-[16/10] overflow-hidden relative bg-[#F1EFEA]">
+                                        <img
+                                            src={p.image}
+                                            alt={p.title}
+                                            loading="lazy"
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                        <span className="absolute top-3 left-3 bg-[#161817]/80 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-medium capitalize text-white">
+                                            {p.propertyType || "Residence"}
+                                        </span>
+                                    </div>
+
+                                    <div className="p-5 flex flex-col flex-1 justify-between space-y-4">
+                                        <div className="space-y-2">
+                                            <div className="flex items-baseline justify-between gap-2">
+                                                <p className="type-card-price text-[#1A1A1A] tabular-nums">
+                                                    ₦{Number(p.price || 0).toLocaleString()}
+                                                </p>
+                                                <span className="inline-flex items-center gap-1 type-micro-badge text-[#5C5C58] tabular-nums">
+                                                    <BedDouble size={13} className="text-[#8F8E88]" />
+                                                    {p.bedrooms ?? 0} Beds
+                                                </span>
+                                            </div>
+
+                                            <h3 className="type-card-title text-[#1A1A1A] line-clamp-1">
+                                                {p.title}
+                                            </h3>
+
+                                            <div className="flex items-center gap-1 type-card-meta text-[#5C5C58]">
+                                                <MapPin size={12} className="text-[#1E3A34] shrink-0" />
+                                                <span className="truncate">{p.location}</span>
+                                            </div>
+
+                                            <p className="type-body text-[#5C5C58] line-clamp-2">
+                                                {p.description}
+                                            </p>
+                                        </div>
+
+                                        <div className="space-y-3 pt-3 border-t border-[#E4E2DC]">
+                                            <div className="flex items-center justify-between text-xs">
+                                                <span className="text-[#8F8E88]">Next Viewing</span>
+                                                <span className="font-semibold text-[#2E7D32] tabular-nums">
+                                                    {p.availableSlots?.[0]?.date
+                                                        ? new Date(
+                                                              p.availableSlots[0].date
+                                                          ).toLocaleDateString("en-GB", {
+                                                              day: "2-digit",
+                                                              month: "short",
+                                                              year: "numeric",
+                                                          })
+                                                        : "No slots set"}
+                                                </span>
+                                            </div>
+
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setActiveTab("appointments")}
+                                                    className="flex-1 flex justify-center items-center gap-1.5 py-2 px-3 bg-[#F1EFEA] hover:bg-[#1E3A34] text-[#1A1A1A] hover:text-white rounded-[8px] text-xs font-semibold transition-colors cursor-pointer"
+                                                >
+                                                    <Calendar size={13} />
+                                                    <span>Viewings</span>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => navigate(`/property/update/${p._id}`)}
+                                                    className="flex-1 flex justify-center items-center gap-1.5 py-2 px-3 bg-white border border-[#E4E2DC] hover:border-[#1E3A34] text-[#1A1A1A] rounded-[8px] text-xs font-semibold transition-colors cursor-pointer"
+                                                >
+                                                    <Edit3 size={13} />
+                                                    <span>Edit</span>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    aria-label="Delete property"
+                                                    onClick={() => {
+                                                        setSelectedPropertyId(p._id);
+                                                        openModal();
+                                                    }}
+                                                    className="p-2 bg-white border border-[#E4E2DC] hover:border-[#C86D51] text-[#C86D51] rounded-[8px] transition-colors cursor-pointer"
+                                                >
+                                                    <Trash2 size={15} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </article>
                             ))
                         )}
                     </div>
                 )}
 
+                {/* ── Appointments Tab ── */}
                 {activeTab === "appointments" && (
-                    <div className="bg-white rounded-3xl shadow-xl border border-slate-400 overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <div className="flex items-center gap-4 rounded-xl border border-gray-100 bg-white p-4 shadow-sm m-3 mb-2">
-                                <div className="rounded-lg bg-blue-50 p-2.5 text-blue-600">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500">Booked Appointments</p>
-                                    <p className="text-2xl font-bold text-gray-900">{appointmentdata?.length || 0}</p>
-                                </div>
+                    <div className="bg-white rounded-[12px] border border-[#E4E2DC] overflow-hidden shadow-xs">
+                        <div className="px-6 py-4 bg-[#F1EFEA] border-b border-[#E4E2DC] flex items-center justify-between">
+                            <div>
+                                <h2
+                                    id="appointments-table-caption"
+                                    className="font-serif-editorial text-lg font-medium text-[#1A1A1A]"
+                                >
+                                    Scheduled Client Viewings
+                                </h2>
+                                <p className="text-xs text-[#5C5C58]">
+                                    Approve or decline incoming private tour requests.
+                                </p>
                             </div>
+                            <span className="px-3 py-1 rounded-full bg-white border border-[#E4E2DC] text-xs font-semibold text-[#1A1A1A] tabular-nums">
+                                {appointmentdata?.length || 0} Total
+                            </span>
+                        </div>
 
-                            <table className="w-full text-left border-collapse min-w-[800px]">
+                        <div
+                            tabIndex={0}
+                            role="region"
+                            aria-labelledby="appointments-table-caption"
+                            className="pv-table-region"
+                        >
+                            <table className="w-full text-left min-w-[780px]">
                                 <thead>
-                                    <tr className="bg-slate-50/50 text-slate-400 text-[10px] uppercase tracking-[0.15em] font-black border-b border-slate-100">
-                                        <th className="px-6 py-5">Client Details</th>
-                                        <th className="px-6 py-5">Property</th>
-                                        <th className="px-6 py-5">Date & Time</th>
-                                        <th className="px-6 py-5">Status</th>
-                                        <th className="px-6 py-5 text-center">Actions</th>
+                                    <tr className="bg-[#F9F8F6] text-[#8F8E88] text-[11px] uppercase tracking-wider font-semibold border-b border-[#E4E2DC]">
+                                        <th scope="col" className="px-6 py-4 bg-[#F9F8F6]">Client</th>
+                                        <th scope="col" className="px-6 py-4 bg-[#F9F8F6]">Residence</th>
+                                        <th scope="col" className="px-6 py-4 bg-[#F9F8F6]">Viewing Window</th>
+                                        <th scope="col" className="px-6 py-4 bg-[#F9F8F6]">Status & Notes</th>
+                                        <th scope="col" className="px-6 py-4 text-right bg-[#F9F8F6]">Decision</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-50">
+                                <tbody className="divide-y divide-[#E4E2DC] text-sm">
                                     {appointmentdata?.length > 0 ? (
                                         appointmentdata.map((a) => (
-                                            <tr key={a._id} className="group hover:bg-slate-50/80 transition-all">
-                                                <td className="px-6 py-5">
+                                            <tr key={a._id} className="hover:bg-[#F9F8F6] transition-colors">
+                                                <th scope="row" className="px-6 py-4 font-normal text-left">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="h-10 w-10 flex-shrink-0 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs uppercase">
-                                                            {a.userId?.fullName?.charAt(0) || '?'}
+                                                        <div className="h-9 w-9 shrink-0 rounded-full bg-[#1E3A34] text-white flex items-center justify-center font-serif-editorial text-xs font-semibold uppercase">
+                                                            {a.userId?.fullName?.charAt(0) || "C"}
                                                         </div>
                                                         <div>
-                                                            <p className="font-bold text-slate-800 text-sm leading-tight">
-                                                                {a.userId?.fullName || 'Unknown Client'}
+                                                            <p className="font-semibold text-[#1A1A1A] text-xs sm:text-sm">
+                                                                {a.userId?.fullName || "Private Client"}
                                                             </p>
-                                                            <p className="text-[11px] text-slate-400">{a.email || 'No email specified'}</p>
-                                                            <p className="text-[10px] text-slate-500 font-medium">{a.userId?.phoneNumber || 'No phone number'}</p>
+                                                            <p className="text-xs text-[#5C5C58]">
+                                                                {a.email || a.userId?.email || "No email"}
+                                                            </p>
+                                                            <p className="text-[11px] text-[#8F8E88] tabular-nums">
+                                                                {a.userId?.phoneNumber || ""}
+                                                            </p>
                                                         </div>
                                                     </div>
-                                                </td>
-                                                <td className="px-6 py-5">
+                                                </th>
+
+                                                <td className="px-6 py-4">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="h-12 w-16 flex-shrink-0 bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
-                                                            <img src={a.propertyId?.image || 'https://via.placeholder.com/150'} alt="Property"
-                                                                className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                                                                onError={(e) => { e.target.src = 'https://via.placeholder.com/150'; }} />
-                                                        </div>
+                                                        {a.propertyId?.image && (
+                                                            <img
+                                                                src={a.propertyId.image}
+                                                                alt={a.propertyId?.title || "Property"}
+                                                                className="h-11 w-14 shrink-0 rounded-[6px] object-cover border border-[#E4E2DC]"
+                                                            />
+                                                        )}
                                                         <div className="max-w-[200px]">
-                                                            <p className="font-bold text-slate-700 text-sm leading-tight truncate">
-                                                                {a.propertyId?.title || 'N/A'}
+                                                            <p className="font-serif-editorial font-medium text-[#1A1A1A] text-sm truncate">
+                                                                {a.propertyId?.title || "Residence"}
                                                             </p>
-                                                            <p className="text-[10px] text-indigo-600 font-black uppercase tracking-tight truncate">
-                                                                ₦{a.propertyId?.price?.toLocaleString() || '0'} • {a.propertyId?.location || 'Unknown Location'}
+                                                            <p className="text-xs text-[#5C5C58] truncate tabular-nums">
+                                                                ₦{a.propertyId?.price?.toLocaleString() || "0"} •{" "}
+                                                                {a.propertyId?.location || ""}
                                                             </p>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-5">
-                                                    <div className="flex flex-col gap-1">
-                                                        <span className="flex items-center gap-2 text-slate-700 font-semibold text-sm whitespace-nowrap">
-                                                            <Calendar size={14} className="text-indigo-500 flex-shrink-0" />
-                                                            {a.date ? new Date(a.date).toLocaleDateString('en-GB', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }) : 'Date not set'}
+
+                                                <td className="px-6 py-4">
+                                                    <div className="space-y-1">
+                                                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#1A1A1A] whitespace-nowrap tabular-nums">
+                                                            <Calendar size={13} className="text-[#1E3A34]" />
+                                                            {a.date
+                                                                ? new Date(a.date).toLocaleDateString("en-GB", {
+                                                                      weekday: "short",
+                                                                      year: "numeric",
+                                                                      month: "short",
+                                                                      day: "numeric",
+                                                                  })
+                                                                : "Date pending"}
                                                         </span>
-                                                        <span className="flex items-center gap-2 text-slate-400 text-xs font-medium">
-                                                            <Clock size={14} className="flex-shrink-0" /> {a.time || 'No time set'}
+                                                        <span className="flex items-center gap-1.5 text-xs text-[#5C5C58] tabular-nums">
+                                                            <Clock size={12} className="text-[#8F8E88]" />
+                                                            {a.time || "Time pending"}
                                                         </span>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-5">
-                                                    <div className="flex flex-col gap-1">
-                                                        <span className={`inline-flex items-center w-fit px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${a.status === 'approved' || a.status === 'confirmed'
-                                                            ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                                                            : a.status === 'pending'
-                                                                ? 'bg-amber-50 text-amber-600 border-amber-100'
-                                                                : 'bg-rose-50 text-rose-600 border-rose-100'
-                                                            }`}>
-                                                            {a.status || 'unknown'}
+
+                                                <td className="px-6 py-4">
+                                                    <div className="space-y-1.5">
+                                                        <span
+                                                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold capitalize ${
+                                                                a.status === "approved" || a.status === "confirmed"
+                                                                    ? "bg-[#2E7D32]/10 text-[#2E7D32]"
+                                                                    : a.status === "pending"
+                                                                    ? "bg-[#C86D51]/15 text-[#C86D51]"
+                                                                    : "bg-[#F1EFEA] text-[#8F8E88]"
+                                                            }`}
+                                                        >
+                                                            {a.status || "pending"}
                                                         </span>
-                                                        {a.message ? (
-                                                            <p className="text-sm text-slate-900 italic max-w-[200px] truncate" title={a.message}>"{a.message}"</p>
-                                                        ) : (
-                                                            <span className="text-xs text-red-400">No message</span>
+                                                        {a.message && (
+                                                            <p
+                                                                className="text-xs text-[#5C5C58] italic max-w-[220px] truncate"
+                                                                title={a.message}
+                                                            >
+                                                                "{a.message}"
+                                                            </p>
                                                         )}
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-5">
-                                                    <div className="flex items-center justify-center gap-2 min-w-[150px]">
-                                                        {a.status === 'pending' ? (
-                                                            <>
-                                                                <button onClick={() => approveAppoinment(a._id)} disabled={loadApproval !== null}
-                                                                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white font-bold text-xs rounded-lg transition-all shadow-sm hover:shadow active:scale-95 disabled:scale-100 disabled:cursor-not-allowed whitespace-nowrap">
-                                                                    {loadApproval === a?._id ? "Processing..." : "Approve"}
-                                                                </button>
-                                                                <button onClick={() => cancelAppointment(a._id)} disabled={loadCancel !== null}
-                                                                    className="px-3 py-1.5 bg-white hover:bg-rose-50 disabled:bg-white text-rose-600 disabled:text-slate-400 border border-rose-200 hover:border-rose-300 disabled:border-slate-200 font-bold text-xs rounded-lg transition-all active:scale-95 disabled:scale-100 disabled:cursor-not-allowed">
-                                                                    {loadCancel === a?._id ? "Processing..." : "Cancel"}
-                                                                </button>
-                                                            </>
-                                                        ) : (
-                                                            <span className="text-xs text-slate-400 font-medium italic select-none">No Actions Available</span>
-                                                        )}
-                                                    </div>
+
+                                                <td className="px-6 py-4 text-right">
+                                                    {a.status === "pending" ? (
+                                                        <div className="inline-flex items-center gap-2">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => approveAppoinment(a._id)}
+                                                                disabled={loadApproval !== null}
+                                                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#1E3A34] hover:bg-[#142824] disabled:opacity-50 text-white font-semibold text-xs rounded-[8px] transition-colors cursor-pointer"
+                                                            >
+                                                                <CheckCircle2 size={13} />
+                                                                <span>
+                                                                    {loadApproval === a?._id ? "Confirming..." : "Confirm"}
+                                                                </span>
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => cancelAppointment(a._id)}
+                                                                disabled={loadCancel !== null}
+                                                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-white hover:bg-[#F1EFEA] text-[#C86D51] border border-[#E4E2DC] font-semibold text-xs rounded-[8px] transition-colors cursor-pointer"
+                                                            >
+                                                                <XCircle size={13} />
+                                                                <span>
+                                                                    {loadCancel === a?._id ? "Cancelling..." : "Decline"}
+                                                                </span>
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-xs text-[#8F8E88] italic">
+                                                            Completed
+                                                        </span>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan="5" className="px-8 py-20 text-center text-slate-400 italic">
-                                                {loadAppointment ? (
-                                                    <div className="flex items-center justify-center gap-2 text-slate-500 font-medium">
-                                                        Loading appointments
-                                                        <span className="h-4 w-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></span>
-                                                    </div>
-                                                ) : "No appointments found."}
+                                            <td colSpan="5" className="px-6 py-16 text-center text-sm text-[#5C5C58]">
+                                                {loadAppointment
+                                                    ? "Loading viewing appointments..."
+                                                    : "No viewing appointments have been requested yet."}
                                             </td>
                                         </tr>
                                     )}
@@ -342,122 +574,166 @@ export default function AgentProperties() {
                     </div>
                 )}
 
-                {/* ── Stats Tab ── */}
+                {/* ── Analytics Tab ── */}
                 {activeTab === "stats" && (
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-
-                        {/* Total Properties — purple */}
-                        <div className="rounded-[20px] p-5 flex flex-col gap-4 border"
-                            style={{ background: "#EEEDFE", borderColor: "#AFA9EC" }}>
-                            <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                                style={{ background: "#CECBF6" }}>
-                                <Home size={20} style={{ color: "#3C3489" }} />
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        <div className="bg-white border border-[#E4E2DC] rounded-[12px] p-6 space-y-4">
+                            <div className="w-10 h-10 rounded-[8px] bg-[#F1EFEA] flex items-center justify-center text-[#1E3A34]">
+                                <Home size={18} />
                             </div>
                             <div>
-                                <p className="text-xs font-semibold tracking-wide" style={{ color: "#534AB7" }}>
-                                    Total properties
+                                <p className="text-xs font-semibold uppercase tracking-wider text-[#8F8E88]">
+                                    Published Residences
                                 </p>
-                                {showAgentProperty ? (
-                                    <div className="h-9 w-12 rounded-lg animate-pulse mt-1" style={{ background: "#CECBF6" }} />
-                                ) : (
-                                    <h3 className="text-4xl font-black leading-none mt-1" style={{ color: "#3C3489" }}>
-                                        {agentProp?.length ?? 0}
-                                    </h3>
-                                )}
+                                <p className="font-sans-ui text-4xl font-semibold text-[#1A1A1A] mt-1 tabular-nums tracking-[-0.02em]">
+                                    {agentProp?.length ?? 0}
+                                </p>
+                            </div>
+                            <div className="space-y-1.5">
+                                <div className="h-1.5 rounded-full w-full bg-[#F1EFEA] overflow-hidden">
+                                    <div
+                                        className="h-full rounded-full bg-[#1E3A34]"
+                                        style={{
+                                            width: `${Math.min(100, ((agentProp?.length ?? 0) / 20) * 100)}%`,
+                                        }}
+                                    />
+                                </div>
+                                <p className="text-xs text-[#5C5C58]">Active agency portfolio</p>
+                            </div>
+                        </div>
+
+                        <div className="bg-white border border-[#E4E2DC] rounded-[12px] p-6 space-y-4">
+                            <div className="w-10 h-10 rounded-[8px] bg-[#2E7D32]/10 flex items-center justify-center text-[#2E7D32]">
+                                <Calendar size={18} />
                             </div>
                             <div>
-                                <div className="h-1 rounded-full w-full" style={{ background: "#CECBF6" }}>
-                                    <div className="h-1 rounded-full" style={{
-                                        background: "#534AB7",
-                                        width: `${Math.min(100, ((agentProp?.length ?? 0) / 20) * 100)}%`
-                                    }} />
+                                <p className="text-xs font-semibold uppercase tracking-wider text-[#8F8E88]">
+                                    Total Viewing Requests
+                                </p>
+                                <p className="font-sans-ui text-4xl font-semibold text-[#1A1A1A] mt-1 tabular-nums tracking-[-0.02em]">
+                                    {appointmentdata?.length ?? 0}
+                                </p>
+                            </div>
+                            <div className="space-y-1.5">
+                                <div className="h-1.5 rounded-full w-full bg-[#F1EFEA] overflow-hidden">
+                                    <div
+                                        className="h-full rounded-full bg-[#2E7D32]"
+                                        style={{
+                                            width: `${Math.min(
+                                                100,
+                                                (confirmedCount / (appointmentdata?.length || 1)) * 100
+                                            )}%`,
+                                        }}
+                                    />
                                 </div>
-                                <p className="text-xs mt-1.5" style={{ color: "#534AB7" }}>
-                                    of 20 listing goal
+                                <p className="text-xs text-[#2E7D32] font-medium tabular-nums">
+                                    {confirmedCount} confirmed viewings
                                 </p>
                             </div>
                         </div>
 
-                        {/* Total Appointments — teal */}
-                        <div className="rounded-[20px] p-5 flex flex-col gap-4 border"
-                            style={{ background: "#E1F5EE", borderColor: "#5DCAA5" }}>
-                            <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                                style={{ background: "#9FE1CB" }}>
-                                <Calendar size={20} style={{ color: "#085041" }} />
+                        <div className="bg-white border border-[#E4E2DC] rounded-[12px] p-6 space-y-4">
+                            <div className="w-10 h-10 rounded-[8px] bg-[#C86D51]/15 flex items-center justify-center text-[#C86D51]">
+                                <Clock size={18} />
                             </div>
                             <div>
-                                <p className="text-xs font-semibold tracking-wide" style={{ color: "#0F6E56" }}>
-                                    Total appointments
+                                <p className="text-xs font-semibold uppercase tracking-wider text-[#8F8E88]">
+                                    Awaiting Confirmation
                                 </p>
-                                {loadAppointment ? (
-                                    <div className="h-9 w-12 rounded-lg animate-pulse mt-1" style={{ background: "#9FE1CB" }} />
-                                ) : (
-                                    <h3 className="text-4xl font-black leading-none mt-1" style={{ color: "#085041" }}>
-                                        {appointmentdata?.length ?? 0}
-                                    </h3>
-                                )}
+                                <p className="font-sans-ui text-4xl font-semibold text-[#1A1A1A] mt-1 tabular-nums tracking-[-0.02em]">
+                                    {pendingCount}
+                                </p>
                             </div>
-                            <div>
-                                <div className="h-1 rounded-full w-full" style={{ background: "#9FE1CB" }}>
-                                    <div className="h-1 rounded-full" style={{
-                                        background: "#0F6E56",
-                                        width: `${Math.min(100, ((appointmentdata?.filter(a => a.status === "confirmed" || a.status === "approved").length ?? 0) / (appointmentdata?.length || 1)) * 100)}%`
-                                    }} />
+                            <div className="space-y-1.5">
+                                <div className="h-1.5 rounded-full w-full bg-[#F1EFEA] overflow-hidden">
+                                    <div
+                                        className="h-full rounded-full bg-[#C86D51]"
+                                        style={{
+                                            width: `${Math.min(
+                                                100,
+                                                (pendingCount / (appointmentdata?.length || 1)) * 100
+                                            )}%`,
+                                        }}
+                                    />
                                 </div>
-                                <p className="text-xs mt-1.5" style={{ color: "#0F6E56" }}>
-                                    {appointmentdata?.filter(a => a.status === "confirmed" || a.status === "approved").length ?? 0} confirmed
+                                <p className="text-xs text-[#C86D51] font-medium">
+                                    Requires advisor response
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* ── Account Tab ── */}
+                {activeTab === "account" && (
+                    <div className="bg-white rounded-[12px] border border-[#E4E2DC] p-6 sm:p-8 max-w-xl space-y-6">
+                        <div className="flex items-center gap-4">
+                            {userInfo?.profileImage ? (
+                                <img
+                                    src={userInfo.profileImage}
+                                    alt={userInfo?.fullName || "Advisor"}
+                                    className="w-16 h-16 rounded-full object-cover border border-[#E4E2DC]"
+                                />
+                            ) : (
+                                <div className="w-16 h-16 rounded-full bg-[#1E3A34] text-white flex items-center justify-center font-serif-editorial text-2xl font-semibold">
+                                    {userInfo?.fullName?.charAt(0) || "A"}
+                                </div>
+                            )}
+                            <div>
+                                <h3 className="font-serif-editorial text-2xl font-normal text-[#1A1A1A]">
+                                    {userInfo?.fullName || "Partner Advisor"}
+                                </h3>
+                                <p className="text-xs font-medium text-[#5C5C58]">
+                                    {userInfo?.agencyName || "Propvista Partner Agency"}
                                 </p>
                             </div>
                         </div>
 
-                        {/* Pending Requests — coral */}
-                        <div className="rounded-[20px] p-5 flex flex-col gap-4 border"
-                            style={{ background: "#FAECE7", borderColor: "#F0997B" }}>
-                            <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                                style={{ background: "#F5C4B3" }}>
-                                <Clock size={20} style={{ color: "#712B13" }} />
+                        <div className="divide-y divide-[#E4E2DC] border-t border-b border-[#E4E2DC] text-sm">
+                            <div className="flex justify-between py-3">
+                                <span className="text-[#8F8E88]">Email Address</span>
+                                <span className="font-semibold text-[#1A1A1A]">
+                                    {userInfo?.email || "N/A"}
+                                </span>
                             </div>
-                            <div>
-                                <p className="text-xs font-semibold tracking-wide" style={{ color: "#993C1D" }}>
-                                    Pending requests
-                                </p>
-                                {loadAppointment ? (
-                                    <div className="h-9 w-12 rounded-lg animate-pulse mt-1" style={{ background: "#F5C4B3" }} />
-                                ) : (
-                                    <h3 className="text-4xl font-black leading-none mt-1" style={{ color: "#712B13" }}>
-                                        {appointmentdata?.filter(a => a.status === "pending").length ?? 0}
-                                    </h3>
-                                )}
+                            <div className="flex justify-between py-3">
+                                <span className="text-[#8F8E88]">Telephone</span>
+                                <span className="font-semibold text-[#1A1A1A] tabular-nums">
+                                    {userInfo?.phone || "N/A"}
+                                </span>
                             </div>
-                            <div>
-                                <div className="h-1 rounded-full w-full" style={{ background: "#F5C4B3" }}>
-                                    <div className="h-1 rounded-full" style={{
-                                        background: "#993C1D",
-                                        width: `${Math.min(100, ((appointmentdata?.filter(a => a.status === "pending").length ?? 0) / (appointmentdata?.length || 1)) * 100)}%`
-                                    }} />
-                                </div>
-                                <p className="text-xs mt-1.5" style={{ color: "#993C1D" }}>
-                                    Needs your review
-                                </p>
+                            <div className="flex justify-between py-3">
+                                <span className="text-[#8F8E88]">Office Location</span>
+                                <span className="font-semibold text-[#1A1A1A]">
+                                    {userInfo?.location || "N/A"}
+                                </span>
                             </div>
                         </div>
 
+                        <button
+                            type="button"
+                            onClick={logout}
+                            className="w-full flex items-center justify-center gap-2 py-3 rounded-[8px] bg-[#161817] hover:bg-[#1E3A34] text-white font-semibold text-xs transition-colors cursor-pointer"
+                        >
+                            <LogOut size={15} />
+                            <span>Sign Out of Advisor Portal</span>
+                        </button>
                     </div>
                 )}
             </main>
 
-            {/* ── Mobile Bottom Navigation ── */}
-            <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 flex md:hidden">
+            {/* Mobile Bottom Navigation */}
+            <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-[#E4E2DC] flex md:hidden">
                 {navItems.map((item) => (
                     <button
                         key={item.id}
+                        type="button"
                         onClick={() => setActiveTab(item.id)}
-                        className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 text-[10px] font-bold uppercase tracking-wider transition-colors ${activeTab === item.id
-                            ? "text-indigo-600"
-                            : "text-slate-400"
-                            }`}
+                        className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 text-[10px] font-semibold uppercase tracking-wider transition-colors ${
+                            activeTab === item.id ? "text-[#1E3A34]" : "text-[#8F8E88]"
+                        }`}
                     >
-                        <item.icon size={20} />
+                        <item.icon size={18} />
                         <span>{item.label}</span>
                     </button>
                 ))}
