@@ -95,7 +95,7 @@ PropVista Application/
     ├── main.jsx                    # Application entry point
     ├── AgentAuthPage/              # Partner Advisor Sign In & Registration
     │   ├── SignIn.jsx
-    │   └── SignUp.jsx
+    │   └── Signup.jsx
     ├── AuthPages/                  # Client Sign In & Registration
     │   ├── SignInPage.jsx
     │   └── SignupPage.jsx
